@@ -1,0 +1,25 @@
+{
+  "name": "pouchdb-collections",
+  "version": "0.0.1",
+  "description": "A simple wrapper model for the pouchdb database",
+  "main": "collections.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "pouchdb",
+    "db",
+    "mongo"
+  ],
+  "author": "daniel.eissing@gmx.net",
+  "license": "MIT",
+  "dependencies": {
+    "detect-node": "^2.0.3",
+    "lodash": "^3.0.0",
+    "pouchdb": "^3.2.1",
+    "q": "^1.1.2"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0"
+  }
+}

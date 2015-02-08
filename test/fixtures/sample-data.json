@@ -1,0 +1,51 @@
+{
+  "values": [{
+    "count": 1,
+    "value": "test-1",
+    "shared": "shared",
+    "nested": {
+      "shared": "nested-shared",
+      "value": "test-nested-1",
+      "deep": {
+        "shared": "nested-deep-shared",
+        "value": "test-nested-deep-1"
+      }
+    }
+  }, {
+    "count": 2,
+    "value": "test-2",
+    "shared": "shared",
+    "nested": {
+      "shared": "nested-shared",
+      "value": "test-nested-2",
+      "deep": {
+        "shared": "nested-deep-shared",
+        "value": "test-nested-deep-2"
+      }
+    }
+  }, {
+    "count": 3,
+    "value": "test-3",
+    "shared": "shared",
+    "nested": {
+      "shared": "nested-shared",
+      "value": "test-nested-3"
+    }
+  }, {
+    "count": 4,
+    "value": "test-4",
+    "shared": "shared"
+  }, {
+    "count": 5,
+    "value": "test-5",
+    "shared": "unique",
+    "nested": {
+      "shared": "shared-nested-unique",
+      "unique-value": "test-nested-unique",
+      "deep": {
+        "shared": "shared-nested-deep-unique",
+        "unique-value": "test-nested-deep-unique"
+      }
+    }
+  }]
+}
