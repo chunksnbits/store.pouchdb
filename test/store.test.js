@@ -1,5 +1,5 @@
 /* jshint node:true */
-/* global describe, beforeEach, before, after, it */
+/* global describe, beforeEach, before, after, it, catchIt */
 
 // Ignores "Expected an assignment or function call and instead saw an expression"
 /* jshint -W030 */
@@ -288,8 +288,8 @@ describe('Via the collections library', function(){
           });
       });
 
-    it('throws a ShelfDocumentUpdateConflict when trying to update an already updated item',
-      function (done) {
+    catchIt('throws a ShelfDocumentUpdateConflict when trying to update an already updated item',
+      function () {
 
         var revision;
 
@@ -309,11 +309,9 @@ describe('Via the collections library', function(){
               rev: revision
             }));
           })
-          .then(function () {
-            done(new Error('Failed - Expected a ShelfDocumentUpdateConflict'));
-          })
           .catch(function (error) {
             expect(error.name).to.equal('ShelfDocumentUpdateConflict');
+            throw error;
           });
       });
   });
