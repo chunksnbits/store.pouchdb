@@ -1,5 +1,5 @@
 /* jshint node:true */
-/* global describe, afterEach, beforeEach, it */
+/* global describe, afterEach, beforeEach, it, catchIt */
 
 // Ignores "Expected an assignment or function call and instead saw an expression"
 /* jshint -W030 */
@@ -53,7 +53,7 @@ describe('Via the collections library', function(){
 
   describe('using remove(:item)', function () {
 
-    it('will delete the item provided',
+    catchIt('will delete the item provided',
       function () {
 
         var testItem = sampleData['test-1'];
@@ -62,8 +62,10 @@ describe('Via the collections library', function(){
           .then(function () {
             return testCollection.find(testItem.id)
               .catch(function (error) {
-                expect(error.type).to.equal('not-found');
-                expect(error._original.reason).to.equal('deleted');
+                expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
+                expect(error.info._original.reason).to.equal('deleted');
+
+                throw error;
               });
           });
       });
@@ -73,13 +75,10 @@ describe('Via the collections library', function(){
 
         var testItem = sampleData['test-1'];
 
-        console.log('testItem', testItem);
-
         return testCollection.remove(testItem)
           .then(function () {
             return testCollection.find()
               .then(function (items) {
-                console.log(items);
                 var mapped = {};
                 _.each(items, function (item) {
                   mapped[item.id] = item;
@@ -91,29 +90,28 @@ describe('Via the collections library', function(){
           });
       });
 
-    // it('throws an ShelfDocumentNotFoundConflict when the item is not found in the collection',
-    //   function (done) {
+    it('throws an ShelfDocumentNotFoundConflict when the item is not found in the collection',
+      function () {
 
-    //     var testItem = sampleData['test-1'];
+        var testItem = sampleData['test-1'];
 
-    //     return testCollection.remove(testItem)
-    //       .then(function () {
-    //         return testCollection.remove(testItem)
-    //           .then(function () {
-    //             done(new Error('Test should have thrown a ShelfDocumentNotFoundConflict'));
-    //           })
-    //           .catch(function (error) {
-    //             expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
-    //             done();
-    //           });
-    //       });
-    //   });
+        return testCollection.remove(testItem)
+          .then(function () {
+            return testCollection.remove(testItem)
+              .catch(function (error) {
+                expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
+                expect(error.info._original.reason).to.equal('deleted');
+
+                throw error;
+              });
+          });
+      });
   });
 
   describe('using remove([:items])', function () {
 
 
-    it('will delete the items provided',
+    catchIt('will delete the items provided',
       function () {
 
         var testItems = [sampleData['test-1'], sampleData['test-2']];
@@ -127,8 +125,10 @@ describe('Via the collections library', function(){
 
                 testCollection.find(testItems[1].id)
                   .catch(function (error) {
-                    expect(error.type).to.equal('not-found');
-                    expect(error._original.reason).to.equal('deleted');
+                    expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
+                    expect(error.info._original.reason).to.equal('deleted');
+
+                    throw error;
                   });
               });
           });
@@ -155,25 +155,28 @@ describe('Via the collections library', function(){
           });
       });
 
-    // it('throws an \'not-found\' exception when the item is not found in the collection',
-    //   function () {
+    catchIt('throws an ShelfDocumentNotFoundConflict when the item is not found in the collection',
+      function () {
 
-    //     var testItems = [sampleData['test-1'], sampleData['test-2']];
+        var testItems = [sampleData['test-1'], sampleData['test-2']];
 
-    //     return testCollection.remove(testItems)
-    //       .then(function () {
-    //         return testCollection.remove(testItems)
-    //           .catch(function (error) {
-    //             expect(error.type).to.equal('not-found');
-    //           });
-    //       });
-    //   });
+        return testCollection.remove(testItems)
+          .then(function () {
+            return testCollection.remove(testItems)
+              .catch(function (error) {
+                expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
+                expect(error.info._original.reason).to.equal('deleted');
+
+                throw error;
+              });
+          });
+      });
   });
 
   describe('using remove(:query)', function () {
 
 
-    it('will delete a single item solely identified by a query',
+    catchIt('will delete a single item solely identified by a query',
       function () {
 
         var testItem = sampleData['test-1'];
@@ -184,8 +187,9 @@ describe('Via the collections library', function(){
 
             return testCollection.find(testItem.id)
               .catch(function (error) {
-                expect(error.type).to.equal('not-found');
-                expect(error._original.reason).to.equal('deleted');
+                expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
+                expect(error.info._original.reason).to.equal('deleted');
+                throw error;
               });
           });
       });
