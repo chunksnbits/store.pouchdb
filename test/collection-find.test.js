@@ -13,36 +13,48 @@ var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
-var testCollection, pouch, sampleData;
+var testCollection, pouch, sampleData = {};
+
+function clearAllDocs (pouch) {
+  return pouch.allDocs()
+    .then(function (response) {
+      return q.all(_.map(response.rows, function (row) {
+        return pouch.remove(row.id, row.value.rev);
+      }));
+    });
+}
+
 
 describe('Via the collections library', function(){
 
-  before(function populateDb (done) {
-
+  before(function initialize () {
     testCollection = Collection.load('tests', { debug: true });
-    pouch = testCollection._pouch;
+    pouch = testCollection.adapter.pouch;
+  });
 
-    return testCollection.empty()
-      .then(function () {
-        return testCollection.store(require('./fixtures/sample-data.json').values);
-      })
-      .then(function (items) {
-        sampleData = {};
+  before(function emptyDb () {
+    return clearAllDocs(pouch);
+  });
 
-        _.each(items, function (item) {
-          sampleData[item.value] = item;
+  before(function populateDb () {
+    var items = require('./fixtures/sample-data.json').values;
+
+    return pouch.bulkDocs(items)
+      .then(function (identity) {
+        return _.map(items, function (item, index) {
+          sampleData[item.value] = _.extend(item, identity[index]);
         });
       });
   });
 
-  after(function clearDb (done) {
-    return testCollection.empty();
+  after(function clearDb () {
+    return pouch.destroy();
   });
 
   describe('using find(:id)', function () {
 
     it('returns the right item when querying by id',
-      function (done) {
+      function () {
 
         var testItem = sampleData['test-1'];
 
@@ -57,14 +69,14 @@ describe('Via the collections library', function(){
       });
 
     catchIt('throws an \'not-found\' exception when no item is found for the given id',
-      function (done) {
+      function () {
         return testCollection.find('invalid');
       });
   });
 
   describe('using find(:query)', function () {
     it('returns the right item when querying by query',
-      function (done) {
+      function () {
 
         var testItem = sampleData['test-1'];
 
@@ -83,7 +95,7 @@ describe('Via the collections library', function(){
       });
 
     it('returns the right item when querying by nested query',
-      function (done) {
+      function () {
 
         var testItem = sampleData['test-1'];
 
@@ -106,7 +118,7 @@ describe('Via the collections library', function(){
       });
 
     it('returns all items that match the given query with nested queries',
-      function (done) {
+      function () {
 
         return testCollection.find({
           shared: 'shared'
@@ -117,7 +129,7 @@ describe('Via the collections library', function(){
       });
 
     it('returns all items that match the given query',
-      function (done) {
+      function () {
 
         return testCollection.find({
           nested: {
@@ -130,7 +142,7 @@ describe('Via the collections library', function(){
       });
 
     it('returns an empty array if no entity in the collection matches the query',
-      function (done) {
+      function () {
 
         return testCollection.find({ value: 'invalid' })
           .then(function (items) {
@@ -143,7 +155,7 @@ describe('Via the collections library', function(){
   describe('using find()', function () {
 
     it('returns all items in the collection',
-      function (done) {
+      function () {
         return testCollection.find()
           .then(function (items) {
             expect(items.length).to.equal(5);
@@ -151,7 +163,7 @@ describe('Via the collections library', function(){
       });
 
     it('returns the full dataset',
-      function (done) {
+      function () {
 
         var testItem = sampleData['test-1'];
 
@@ -174,11 +186,11 @@ describe('Via the collections library', function(){
       });
 
     it('returns an empty array if there is no entity in the collection',
-      function (done) {
+      function () {
 
-        return testCollection.empty()
+        return clearAllDocs(pouch)
           .then(function () {
-            testCollection.find()
+            return testCollection.find()
               .then(function (items) {
                 expect(items.length).to.equal(0);
               });
