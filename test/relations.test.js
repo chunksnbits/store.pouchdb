@@ -21,6 +21,7 @@ function clearDb (done) {
 
   function empty (collection) {
     var pouch = collection.adapter.pouch;
+
     return pouch.allDocs()
       .then(function (response) {
         return q.all(_.map(response.rows, function (row) {

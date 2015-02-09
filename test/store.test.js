@@ -17,6 +17,14 @@ require('mocha-qa').global();
 
 var testCollection, pouch;
 
+function clearAllDocs (pouch) {
+  return pouch.allDocs()
+    .then(function (response) {
+      return q.all(_.map(response.rows, function (row) {
+        return pouch.remove(row.id, row.value.rev);
+      }));
+    });
+}
 
 describe('Via the collections library', function(){
 
@@ -24,6 +32,8 @@ describe('Via the collections library', function(){
     testCollection = Collection.load('tests', { debug: true });
 
     pouch = testCollection.adapter.pouch;
+
+    return clearAllDocs(pouch);
   });
 
   beforeEach(function emptyDb () {
@@ -35,10 +45,6 @@ describe('Via the collections library', function(){
 
         return q.all(promises);
       });
-  });
-
-  after(function resetDb () {
-    return pouch.destroy();
   });
 
   describe('using store() with new items', function () {

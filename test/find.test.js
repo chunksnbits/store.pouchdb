@@ -24,7 +24,6 @@ function clearAllDocs (pouch) {
     });
 }
 
-
 describe('Via the collections library', function(){
 
   before(function initialize () {
@@ -37,7 +36,7 @@ describe('Via the collections library', function(){
   });
 
   before(function populateDb () {
-    var items = require('./fixtures/sample-data.json').values;
+    var items = _.cloneDeep(require('./fixtures/sample-data.json').values);
 
     return pouch.bulkDocs(items)
       .then(function (identity) {
@@ -45,10 +44,6 @@ describe('Via the collections library', function(){
           sampleData[item.value] = _.extend(item, identity[index]);
         });
       });
-  });
-
-  after(function clearDb () {
-    return pouch.destroy();
   });
 
   describe('using find(:id)', function () {
