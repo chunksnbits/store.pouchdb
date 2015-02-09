@@ -18,10 +18,21 @@ require('mocha-qa').global();
 var testCollection, vehiclesCollection, boatCollection, pouch;
 
 function clearDb (done) {
+
+  function empty (collection) {
+    var pouch = collection.adapter.pouch;
+    return pouch.allDocs()
+      .then(function (response) {
+        return q.all(_.map(response.rows, function (row) {
+          return pouch.remove(row.id, row.value.rev);
+        }));
+      });
+  }
+
   return q.all([
-    testCollection.empty(),
-    vehiclesCollection.empty(),
-    boatCollection.empty()
+    empty(testCollection),
+    empty(vehiclesCollection),
+    empty(boatCollection)
   ]);
 }
 
@@ -36,8 +47,6 @@ describe('Via the collections library', function() {
 
     vehiclesCollection = Collection.load('vehicles');
     boatCollection = Collection.load('boat');
-
-    pouch = testCollection._pouch;
 
     // Just to be sure
     return clearDb(done);
@@ -278,7 +287,6 @@ describe('Via the collections library', function() {
           }
         })
           .then(function (item) {
-            console.log('RELATIONS', item);
             itemToCompare = _.clone(item.boat);
 
             item.value = 'changed';

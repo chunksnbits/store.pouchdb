@@ -281,5 +281,34 @@ describe('Via the collections library', function(){
               });
           });
       });
+
+    it('throws a ShelfDocumentUpdateConflict when trying to update an already updated item',
+      function (done) {
+
+        var revision;
+
+        return testCollection
+          .store({
+            value: 'test-1'
+          })
+          .then(function (item) {
+            revision = item.rev;
+            return testCollection.store(_.merge(item, {
+              value: 'test-2'
+            }));
+          })
+          .then(function (item) {
+            return testCollection.store(_.merge(item, {
+              value: 'test-3',
+              rev: revision
+            }));
+          })
+          .then(function () {
+            done(new Error('Failed - Expected a ShelfDocumentUpdateConflict'));
+          })
+          .catch(function (error) {
+            expect(error.name).to.equal('ShelfDocumentUpdateConflict');
+          });
+      });
   });
 });
