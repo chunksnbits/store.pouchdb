@@ -4,7 +4,7 @@
   "description": "A simple wrapper model for the pouchdb database",
   "main": "collections.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/.bin/testem"
   },
   "keywords": [
     "pouchdb",
@@ -17,10 +17,12 @@
     "detect-node": "^2.0.3",
     "lodash": "^3.0.0",
     "pouchdb": "^3.2.1",
-    "q": "^1.1.2"
+    "q": "^1.1.2",
+    "testem": "^0.6.39"
   },
   "devDependencies": {
     "chai": "^1.10.0",
-    "memdown": "^1.0.0"
+    "memdown": "^1.0.0",
+    "mocha": "^2.1.0"
   }
 }
