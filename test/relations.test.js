@@ -17,7 +17,7 @@ require('mocha-qa').global();
 
 var testCollection, vehiclesCollection, boatCollection, pouch;
 
-function clearDb (done) {
+function clearDb () {
 
   function empty (collection) {
     var pouch = collection.adapter.pouch;
@@ -39,7 +39,7 @@ function clearDb (done) {
 
 describe('Via the collections library', function() {
 
-  before(function populateDb (done) {
+  before(function populateDb () {
 
     testCollection = Collection.load('tests', { debug: true });
 
@@ -50,7 +50,7 @@ describe('Via the collections library', function() {
     boatCollection = Collection.load('boat');
 
     // Just to be sure
-    return clearDb(done);
+    return clearDb();
   });
 
   afterEach(clearDb);

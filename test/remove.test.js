@@ -29,7 +29,7 @@ var testCollection, pouch, sampleData;
 
 describe('Via the collections library', function(){
 
-  beforeEach(function populateDb (done) {
+  beforeEach(function populateDb () {
 
     testCollection = Collection.load('tests', { debug: true });
     pouch = testCollection.adapter.pouch;
