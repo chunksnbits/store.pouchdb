@@ -27,7 +27,7 @@ function clearAllDocs (pouch) {
 
 var testCollection, pouch, sampleData;
 
-describe('Via the collections library', function(){
+describe('Testing shelfdb deletions', function(){
 
   beforeEach(function populateDb () {
 

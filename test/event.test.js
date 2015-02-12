@@ -24,7 +24,7 @@ function clearAllDocs (pouch) {
     });
 }
 
-describe('Via the collections library', function(){
+describe('Testing shelfdb events', function(){
 
   before(function initialize () {
     testCollection = Collection.load('tests', { debug: true });

@@ -37,7 +37,7 @@ function clearDb () {
   ]);
 }
 
-describe('Via the collections library', function() {
+describe('Testing shelfdb relations', function() {
 
   before(function populateDb () {
 
