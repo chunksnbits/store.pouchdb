@@ -13,7 +13,7 @@
     }
   },
   "launch_in_dev": [
-    "node", "chrome", "firefox", "safari"
+    "node", "chrome"
   ],
   "serve_files": [ "tmp/tests.js" ],
   "before_tests": "mkdir -p tmp && browserify test/suite.js -o tmp/tests.js --ignore-missing",
