@@ -89,6 +89,23 @@ describe('Testing shelfdb storage', function(){
         });
       });
 
+    it('with multiple items successfully stores all items',
+      function () {
+
+        return testCollection.store({
+          value: 'test-1'
+        }, {
+          value: 'test-2'
+        }, {
+          value: 'test-3'
+        }).then(function (storedItem) {
+          return pouch.allDocs()
+            .then(function (response) {
+              expect(response.rows.length).to.equal(3);
+            });
+        });
+      });
+
     it('with an array of n items successfully stores exactly the same number of items',
       function () {
 
