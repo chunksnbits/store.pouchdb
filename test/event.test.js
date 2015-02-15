@@ -6,45 +6,46 @@
 
 'use strict';
 
+
 var expect = require('chai').expect;
-var Collection = require('../lib/shelfdb');
-var PouchDB = require('pouchdb');
+var ShelfDb = require('../lib/shelfdb');
 var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
-var testCollection, pouch, sampleData = {};
+var testCollection, sampleData = {};
 
-function clearAllDocs (pouch) {
-  return pouch.allDocs()
-    .then(function (response) {
-      return q.all(_.map(response.rows, function (row) {
-        return pouch.remove(row.id, row.value.rev);
-      }));
-    });
+function clearAllDocs () {
+  return testCollection.empty();
 }
 
 describe('Testing shelfdb events', function(){
 
   before(function initialize () {
-    testCollection = Collection.load('tests', { debug: true });
-    pouch = testCollection.adapter.pouch;
+    testCollection = ShelfDb.load('tests', { debug: true });
   });
 
   before(function emptyDb () {
-    return clearAllDocs(pouch);
+    return clearAllDocs();
   });
 
-  afterEach(function deregisterEventListeners () {
-    var events = ['change', 'create', 'update', 'delete'];
+  before(function populateDb () {
+    var items = _.cloneDeep(require('./fixtures/sample-data.json').values);
 
-    _.each(events, function (event) {
-      testCollection.off(event);
-    });
+    return testCollection.store(items)
+      .then(function (identity) {
+        return _.map(items, function (item, index) {
+          sampleData[item.value] = _.extend(item, identity[index]);
+        });
+      });
   });
 
-  after(function emptyDb () {
-    return clearAllDocs(pouch);
+  after(function clean () {
+    return clearAllDocs();
+  });
+
+  afterEach(function unregisterEventEmitters () {
+    testCollection.off();
   });
 
   describe('using on(event, fnc)', function () {
@@ -164,34 +165,35 @@ describe('Testing shelfdb events', function(){
     it('allows to deregister a specific event listener by providing the event and callback function',
       function (done) {
 
-        var changeCalled = 0;
-        var item;
+        var callbackCalled = 0;
+        var controlGroupCalled = 0;
 
+        // Event to be deregistered after firing once
         var callback = function () {
-          changeCalled = changeCalled + 1;
+          callbackCalled++;
 
           testCollection.off('change', callback);
-
-          testCollection.store(_.merge(item, {
-            value: 'changed'
-          }));
         };
-
         testCollection.on('change', callback);
 
+        // Controll callback to validate deregistration
+        var controlGroup = function () {
+          if (controlGroupCalled >= 3) {
+            expect(callbackCalled).to.equal(1);
+            return done();
+          }
+
+          controlGroupCalled++;
+          testCollection.store({
+            value: Math.random()
+          });
+        };
+        testCollection.on('change', controlGroup);
+
+        // Start the chain
         testCollection.store({
           value: 'test'
-        })
-          .then(function (result) {
-            item = result;
-
-            testCollection.on('update', function () {
-              setTimeout(function () {
-                expect(changeCalled).to.equal(1);
-                done();
-              }, 0);
-            });
-          });
+        });
       });
   });
 
@@ -200,38 +202,49 @@ describe('Testing shelfdb events', function(){
     it('allows to deregister all listeners to a specific event at once',
       function (done) {
 
-        var changeCalled = 0;
-        var item;
-
-        var callback = function () {
-          changeCalled = changeCalled + 1;
+        var callbackCalled = {
+          first: 0,
+          second: 0
         };
 
-        var callbackTwo = function () {
-          changeCalled = changeCalled + 1;
+        var controlGroupCalled = 0;
 
-          testCollection.off('change');
-          testCollection.store(_.merge(item, {
-            value: 'changed'
-          }));
+        function deregister () {
+          if (callbackCalled.first && callbackCalled.second) {
+            testCollection.off('change');
+          }
+        }
+
+        // Event to be deregistered after firing once
+        testCollection.on('change', function () {
+          callbackCalled.first++;
+          deregister();
+        });
+
+        testCollection.on('change', function () {
+          callbackCalled.second++;
+          deregister();
+        });
+
+        // Controll callback to validate deregistration
+        var controlGroup = function () {
+          if (controlGroupCalled >= 3) {
+            expect(callbackCalled.first).to.equal(1);
+            expect(callbackCalled.second).to.equal(1);
+            return done();
+          }
+
+          controlGroupCalled++;
+          testCollection.store({
+            value: Math.random()
+          });
         };
+        testCollection.on('create', controlGroup);
 
-        testCollection.on('change', callback);
-        testCollection.on('change', callbackTwo);
-
+        // Start the chain
         testCollection.store({
           value: 'test'
-        })
-          .then(function (result) {
-            item = result;
-
-            testCollection.on('update', function () {
-              setTimeout(function () {
-                expect(changeCalled).to.equal(2);
-                done();
-              }, 0);
-            });
-          });
+        });
       });
   });
 
@@ -240,36 +253,34 @@ describe('Testing shelfdb events', function(){
     it('allows to deregister a specific event listener by using the listener returned on registration',
       function (done) {
 
-        var changeCalled = 0;
-        var registration, item;
+        var callbackCalled = 0;
+        var controlGroupCalled = 0;
 
-        var callback = function () {
-          changeCalled = changeCalled + 1;
+        // Event to be deregistered after firing once
+        var eventListener = testCollection.on('change', function () {
+          callbackCalled++;
 
-          if (registration) {
-            registration.off();
+          eventListener.off();
+        });
+
+        // Controll callback to validate deregistration
+        var controlGroup = function () {
+          if (controlGroupCalled >= 3) {
+            expect(callbackCalled).to.equal(1);
+            return done();
           }
 
-          testCollection.store(_.merge(item, {
-            value: 'changed'
-          }));
+          controlGroupCalled++;
+          testCollection.store({
+            value: Math.random()
+          });
         };
+        testCollection.on('change', controlGroup);
 
-        registration = testCollection.on('change', callback);
-
+        // Start the chain
         testCollection.store({
           value: 'test'
-        })
-          .then(function (result) {
-            item = result;
-
-            testCollection.on('update', function () {
-              setTimeout(function () {
-                expect(changeCalled).to.equal(1);
-                done();
-              }, 0);
-            });
-          });
+        });
       });
   });
 
