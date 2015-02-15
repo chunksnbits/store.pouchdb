@@ -1,9 +1,14 @@
 {
-  "name": "pouchdb-collections",
+  "name": "shelfdb",
   "version": "0.0.1",
   "description": "A simple wrapper model for the pouchdb database",
-  "main": "collections.js",
+  "main": "index.js",
   "scripts": {
+    "browserify": "./node_modules/.bin/browserify tmp/suite.js -o tmp/tests.js --ignore-missing",
+    "clean": "rm -rf tmp",
+    "create-suite": "node ./test/utils/create-suite.js",
+    "create-tmp": "mkdir -p tmp",
+    "mocha": "./node_modules/.bin/mocha -r test/utils/setup.js -R tap test/*.test.js",
     "test": "./node_modules/.bin/testem"
   },
   "keywords": [
@@ -14,15 +19,12 @@
   "author": "daniel.eissing@gmx.net",
   "license": "MIT",
   "dependencies": {
-    "detect-node": "^2.0.3",
-    "lodash": "^3.0.0",
-    "pouchdb": "^3.2.1",
-    "q": "^1.1.2",
-    "testem": "^0.6.39"
+    "lodash": "^3.0.0"
   },
   "devDependencies": {
+    "browserify": "^8.1.3",
     "chai": "^1.10.0",
-    "memdown": "^1.0.0",
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "testem": "^0.6.39"
   }
 }

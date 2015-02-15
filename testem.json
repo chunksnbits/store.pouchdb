@@ -3,12 +3,12 @@
   "src_files": [
     "node_modules/chai/chai.js",
     "lib/**/*.js",
-    "test/setup.js",
+    "test/utils/setup.js",
     "test/*.test.js"
   ],
   "launchers": {
     "node": {
-      "command": "./node_modules/.bin/mocha -r test/setup.js -R tap test/*.test.js",
+      "command": "npm run mocha",
       "protocol": "tap"
     }
   },
@@ -16,6 +16,6 @@
     "node", "chrome"
   ],
   "serve_files": [ "tmp/tests.js" ],
-  "before_tests": "mkdir -p tmp && browserify test/suite.js -o tmp/tests.js --ignore-missing",
-  "on_exit": "rm -rf tmp"
+  "before_tests": "npm run create-tmp && npm run create-suite && npm run browserify",
+  "on_exit": "npm run clean"
 }
