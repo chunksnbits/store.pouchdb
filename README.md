@@ -11,3 +11,40 @@ There is actually no functionality added, that cannot be achieved by using the o
 ## ´´
 
 # Usage Example
+
+ShelfDB.load('tracks', {
+  // options
+});
+
+```
+{
+  //
+  // Sync: Client
+  //
+  sync: boolean,              // default: true
+  server: string || {         // default: 'http://localhost:9821/shelf'
+    path: string,             // default: 'localhost'
+    port: int,                // default: 9221
+    root: string              // default: '/shelfdb'
+  },
+
+  authentification: boolean,  // default: true
+
+  //
+  // Adapters: Client + Node
+  //
+  adapter: Object,            // default: will infer by looking up installed modules
+                              // fallback: pouchdb
+
+  db: [Object] || {           // default: will infer by looking up installed modules
+                              // note: Depends on the kind of adapter you are using
+                              // fallback: memory + filesystem
+    root: './.db'
+  }
+
+  //
+  // Other: Client + Node
+  //
+  debug: boolean              // default: false
+}
+```
