@@ -19,6 +19,7 @@
   "author": "daniel.eissing@gmx.net",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.11.2",
     "lodash": "^3.0.0",
     "shelfdb-pouch": "^0.0.1"
   },
