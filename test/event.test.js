@@ -22,7 +22,7 @@ function clearAllDocs () {
 describe('Testing shelfdb events', function(){
 
   before(function initialize () {
-    testCollection = ShelfDb.load('tests', { debug: true });
+    testCollection = ShelfDb.load('tests', { db: 'memdown' });
   });
 
   before(function emptyDb () {
