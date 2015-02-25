@@ -2,6 +2,7 @@
   "preferredAdapters": ["shelfdb-minimongo", "shelfdb-pouch"],
 
   "server": {
+    "protocol": "http",
     "host": "localhost",
     "port": 9221,
     "root": "/shelfdb"
