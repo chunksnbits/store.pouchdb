@@ -1,6 +1,6 @@
 {
   "name": "shelfdb",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A simple wrapper model for the pouchdb database",
   "main": "index.js",
   "scripts": {
@@ -17,15 +17,28 @@
     "mongo"
   ],
   "author": "daniel.eissing@gmx.net",
+  "browser": {
+    "mkdirp": false,
+    "express-pouchdb": false
+  },
   "license": "MIT",
   "dependencies": {
     "lodash": "^3.0.0",
-    "shelfdb-pouch": "^0.0.1"
+    "deep-equal": "^1.0.0",
+    "detect-node": "^2.0.3",
+    "express": "^4.11.2",
+    "express-pouchdb": "^0.14.0",
+    "mkdirp": "^0.5.0",
+    "pouchdb": "^3.3.1",
+    "q": "^1.1.2"
   },
   "devDependencies": {
     "browserify": "^8.1.3",
     "chai": "^1.10.0",
+    "leveldown": "^0.10.4",
+    "memdown": "^1.0.0",
     "mocha": "^2.1.0",
+    "mocha-qa": "^0.9.3",
     "testem": "^0.6.39"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "dbLocation": ".db/",
+
+  "preferredAdapters": [
+    "redisdown",
+    "riakdown",
+    "mongodown",
+    "sqldown",
+    "mysqldown",
+    "memdown"
+  ]
+}

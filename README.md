@@ -1,10 +1,8 @@
 # Introduction
 
-pouchdb-collections is a simple wrapper interface around the popular [PouchDB](http://pouchdb.com/api.html) API.
+pouchdb-store is a simple wrapper plugin around [PouchDB](http://pouchdb.com/api.html).
 
-Inspired by the [Dreamcode API](http://nobackend.org/dreamcode.html), this library aims at providing a simple, but powerful offline-first solution to data handling.
-
-There is actually no functionality added, that cannot be achieved by using the original framework. But using it, may hopefully come a little bit more natural to you.
+Inspired by the [Dreamcode API](http://nobackend.org/dreamcode.html) project, this plugin aims at providing a simple, but powerful offline-first solution to data handling.
 
 # Methods
 
@@ -12,39 +10,26 @@ There is actually no functionality added, that cannot be achieved by using the o
 
 # Usage Example
 
-ShelfDB.load('tracks', {
-  // options
-});
+## Setup
 
 ```
-{
-  //
-  // Sync: Client
-  //
-  sync: boolean,              // default: true
-  server: string || {         // default: 'http://localhost:9821/shelf'
-    path: string,             // default: 'localhost'
-    port: int,                // default: 9221
-    root: string              // default: '/shelfdb'
-  },
+var PouchDb = require('pouchdb').plugin(require('pouchdb-model'));
+```
 
-  authentification: boolean,  // default: true
+## Stores
 
-  //
-  // Adapters: Client + Node
-  //
-  adapter: Object,            // default: will infer by looking up installed modules
-                              // fallback: pouchdb
+```
+var Tracks = new PouchDb('tracks').store();
 
-  db: [Object] || {           // default: will infer by looking up installed modules
-                              // note: Depends on the kind of adapter you are using
-                              // fallback: memory + filesystem
-    root: './.db'
+var  = TrackModel.new({
+  artist: 'Superfunk',
+  name: 'Lollipop Heaven',
+  src: './tracks/superfunk-lollipop_heaven.mp3',
+  info: {
+    time: 51,
+    duration: 301
   }
+});
 
-  //
-  // Other: Client + Node
-  //
-  debug: boolean              // default: false
-}
+trackInstance.save();
 ```

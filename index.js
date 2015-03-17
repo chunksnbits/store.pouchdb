@@ -1,4 +1,10 @@
 /* jshint node:true */
 'use strict';
 
-module.exports = require('./lib/shelfdb.js');
+var ShelfDb = require('./lib/shelfdb.js');
+
+module.exports = {
+  collection: function (options) {
+    return ShelfDb.load(this, options);
+  }
+};
