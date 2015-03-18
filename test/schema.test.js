@@ -37,7 +37,7 @@ describe('Testing shelfdb schema', function(){
 
         var PlaylistCollection = new PouchDb('playlists', {
           db: memdown
-        }).collection();
+        }).store();
 
         PlaylistCollection.hasMany('tracks');
 
@@ -54,7 +54,7 @@ describe('Testing shelfdb schema', function(){
 
         var PlaylistCollection = new PouchDb('playlists', {
           db: memdown
-        }).collection();
+        }).store();
 
         PlaylistCollection.hasMany('items', 'tracks');
 
@@ -71,11 +71,11 @@ describe('Testing shelfdb schema', function(){
 
         var PlaylistCollection = new PouchDb('playlists', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var TrackCollection = new PouchDb('tracks', {
           db: leveldown
-        }).collection();
+        }).store();
 
         PlaylistCollection.hasMany('tracks', TrackCollection);
 
@@ -92,11 +92,11 @@ describe('Testing shelfdb schema', function(){
 
         var PlaylistCollection = new PouchDb('playlists', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var TrackCollection = new PouchDb('tracks', {
           db: leveldown
-        }).collection();
+        }).store();
 
         TrackCollection.hasMany('likes');
 
@@ -116,11 +116,11 @@ describe('Testing shelfdb schema', function(){
 
         var PlaylistCollection = new PouchDb('playlists', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var TrackCollection = new PouchDb('tracks', {
           db: leveldown
-        }).collection();
+        }).store();
 
         TrackCollection.hasMany('likes');
 
@@ -140,7 +140,7 @@ describe('Testing shelfdb schema', function(){
 
         var TrackCollection = new PouchDb('tracks', {
           db: memdown
-        }).collection();
+        }).store();
 
         TrackCollection.hasOne('artist');
 
@@ -157,7 +157,7 @@ describe('Testing shelfdb schema', function(){
 
         var TrackCollection = new PouchDb('tracks', {
           db: memdown
-        }).collection();
+        }).store();
 
         TrackCollection.hasOne('artist', 'artists');
 
@@ -174,15 +174,15 @@ describe('Testing shelfdb schema', function(){
 
         var TrackCollection = new PouchDb('tracks', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var AritstCollection = new PouchDb('artists', {
           db: leveldown
-        }).collection();
+        }).store();
 
         TrackCollection.hasOne('artist', AritstCollection);
 
-        var hasOneCollection = TrackCollection._schema.hasOne.artist;        
+        var hasOneCollection = TrackCollection._schema.hasOne.artist;
 
         expect(hasOneCollection.toString()).to.equal('[object Collection]');
         expect(hasOneCollection._adapter.pouch._db_name).to.equal('artists');
@@ -195,11 +195,11 @@ describe('Testing shelfdb schema', function(){
 
         var TrackCollection = new PouchDb('tracks', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var ArtistCollection = new PouchDb('artists', {
           db: leveldown
-        }).collection();
+        }).store();
 
         TrackCollection.hasOne('artist', ArtistCollection);
         ArtistCollection.hasOne('label', 'labels');
@@ -218,11 +218,11 @@ describe('Testing shelfdb schema', function(){
 
         var TrackCollection = new PouchDb('tracks', {
           db: require('memdown')
-        }).collection();
+        }).store();
 
         var ArtistCollection = new PouchDb('artists', {
           db: leveldown
-        }).collection();
+        }).store();
 
         TrackCollection.hasOne('artist', 'artists');
         ArtistCollection.hasOne('label', 'labels');

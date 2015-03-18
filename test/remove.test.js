@@ -34,7 +34,7 @@ describe('Testing shelfdb deletions', function(){
   beforeEach(function populateDb () {
 
     pouch = new PouchDb('tests', { db: require('memdown') });
-    collection = pouch.collection();
+    collection = pouch.store();
 
     return clearAllDocs(pouch)
       .then(function () {

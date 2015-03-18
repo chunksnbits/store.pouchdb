@@ -37,7 +37,7 @@ describe('Testing shelfdb schema', function(){
 
         var TestCollection = new PouchDb('tests', {
           db: memdown
-        }).collection({
+        }).store({
           properties: {
             stringValue: 'string',
             numberValue: 'number',
@@ -67,7 +67,7 @@ describe('Testing shelfdb schema', function(){
 
         var TestCollection = new PouchDb('tests', {
           db: memdown
-        }).collection({
+        }).store({
           properties: {
             stringValue: { required: true },
             numberValue: { required: true },
@@ -104,7 +104,7 @@ describe('Testing shelfdb schema', function(){
 
         var TestCollection = new PouchDb('tests', {
           db: memdown
-        }).collection({
+        }).store({
           properties: {
             stringValue: customValidation,
             numberValue: customValidation,
@@ -139,7 +139,7 @@ describe('Testing shelfdb schema', function(){
 
         var TestCollection = new PouchDb('tests', {
           db: memdown
-        }).collection({
+        }).store({
           properties: {
             value: 'string'
           }
@@ -159,7 +159,7 @@ describe('Testing shelfdb schema', function(){
 
         var TestCollection = new PouchDb('tests', {
           db: memdown
-        }).collection({
+        }).store({
           properties: {
             value: 'number'
           }
@@ -179,7 +179,7 @@ describe('Testing shelfdb schema', function(){
 
           var TestCollection = new PouchDb('tests', {
             db: memdown
-          }).collection({
+          }).store({
             properties: {
               value: 'date'
             }
@@ -200,7 +200,7 @@ describe('Testing shelfdb schema', function(){
 
           var TestCollection = new PouchDb('tests', {
             db: memdown
-          }).collection({
+          }).store({
             properties: {
               value: 'boolean'
             }
@@ -220,7 +220,7 @@ describe('Testing shelfdb schema', function(){
 
           var TestCollection = new PouchDb('tests', {
             db: memdown
-          }).collection({
+          }).store({
             properties: {
               value: 'object'
             }
@@ -240,7 +240,7 @@ describe('Testing shelfdb schema', function(){
 
           var TestCollection = new PouchDb('tests', {
             db: memdown
-          }).collection({
+          }).store({
             properties: {
               value: 'array'
             }

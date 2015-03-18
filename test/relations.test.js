@@ -21,8 +21,8 @@ var testCollection, vehiclesCollection, boatCollection, pouch;
 
 function clearDb () {
 
-  function empty (collection) {
-    var pouch = collection._adapter.pouch;
+  function empty (store) {
+    var pouch = store._adapter.pouch;
 
     return pouch.allDocs()
       .then(function (response) {
@@ -43,13 +43,13 @@ describe('Testing shelfdb relations', function() {
 
   before(function populateDb () {
 
-    testCollection = new PouchDb('tests', { db: require('memdown') }).collection();
+    testCollection = new PouchDb('tests', { db: require('memdown') }).store();
 
     testCollection.hasMany('vehicles');
-    testCollection.hasOne('boat');
+    testCollection.hasOne('boat', 'boats');
 
-    vehiclesCollection = new PouchDb('vehicles', { db: require('memdown') }).collection();
-    boatCollection = new PouchDb('boat', { db: require('memdown') }).collection();
+    vehiclesCollection = new PouchDb('vehicles', { db: require('memdown') }).store();
+    boatCollection = new PouchDb('boats', { db: require('memdown') }).store();
 
     // Just to be sure
     return clearDb();

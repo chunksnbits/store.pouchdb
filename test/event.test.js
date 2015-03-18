@@ -25,7 +25,7 @@ describe('Testing shelfdb events', function(){
 
     collection = new PouchDb('tests', {
       db: require('memdown')
-    }).collection();
+    }).store();
   });
 
   before(function emptyDb () {

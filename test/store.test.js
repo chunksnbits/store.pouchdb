@@ -32,7 +32,7 @@ describe('Testing shelfdb storage', function(){
 
   before(function setUpTestServer () {
     pouch = new PouchDb('tests', { db: require('memdown') });
-    collection = pouch.collection();
+    collection = pouch.store();
   });
 
   beforeEach(function () {

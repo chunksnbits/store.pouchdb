@@ -31,7 +31,7 @@ describe('Testing shelfdb lookups', function(){
 
   before(function initialize () {
     pouch = new PouchDb('tests', { db: require('memdown') });
-    testCollection = pouch.collection();
+    testCollection = pouch.store();
   });
 
   before(function emptyDb () {
