@@ -6,18 +6,18 @@
 
 'use strict';
 
+var PouchDb = require('pouchdb');
+var PouchDbStore = require('../index');
+
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('q');
 
-var shelfdb = require('../index');
-var PouchDb = require('pouchdb');
-
-PouchDb.plugin(shelfdb);
+PouchDb.plugin(PouchDbStore);
 
 require('mocha-qa').global();
 
-var testCollection, vehiclesCollection, boatCollection, pouch;
+var Store, VehicleStore, BoatStore, pouch;
 
 function clearDb () {
 
@@ -33,23 +33,23 @@ function clearDb () {
   }
 
   return q.all([
-    empty(testCollection),
-    empty(vehiclesCollection),
-    empty(boatCollection)
+    empty(Store),
+    empty(VehicleStore),
+    empty(BoatStore)
   ]);
 }
 
-describe('Testing shelfdb relations', function() {
+describe('Testing PouchDbStore relations', function() {
 
   before(function populateDb () {
 
-    testCollection = new PouchDb('tests', { db: require('memdown') }).store();
+    Store = new PouchDb('tests', { db: require('memdown') }).store();
 
-    testCollection.hasMany('vehicles');
-    testCollection.hasOne('boat', 'boats');
+    Store.hasMany('vehicles');
+    Store.hasOne('boat', 'boats');
 
-    vehiclesCollection = new PouchDb('vehicles', { db: require('memdown') }).store();
-    boatCollection = new PouchDb('boats', { db: require('memdown') }).store();
+    VehicleStore = new PouchDb('vehicles', { db: require('memdown') }).store();
+    BoatStore = new PouchDb('boats', { db: require('memdown') }).store();
 
     // Just to be sure
     return clearDb();
@@ -69,10 +69,10 @@ describe('Testing shelfdb relations', function() {
           }]
         };
 
-        return testCollection.store(testItem)
+        return Store.store(testItem)
           .then(function (item) {
 
-            vehiclesCollection.find()
+            VehicleStore.find()
               .then(function (relations) {
                 expect(relations.length).to.equal(1);
                 expect(_.first(relations).id).to.exist;
@@ -95,10 +95,10 @@ describe('Testing shelfdb relations', function() {
           }]
         };
 
-        return testCollection.store(testItem)
+        return Store.store(testItem)
           .then(function (item) {
 
-            vehiclesCollection.find()
+            VehicleStore.find()
               .then(function (relations) {
                 expect(relations.length).to.equal(3);
               });
@@ -124,10 +124,10 @@ describe('Testing shelfdb relations', function() {
           }]
         }];
 
-        return testCollection.store(testItems)
+        return Store.store(testItems)
           .then(function (items) {
 
-            vehiclesCollection.find()
+            VehicleStore.find()
               .then(function (relations) {
                 expect(relations.length).to.equal(4);
               });
@@ -137,7 +137,7 @@ describe('Testing shelfdb relations', function() {
     it('does not update related items if they have not changed',
       function () {
 
-        return vehiclesCollection.store({
+        return VehicleStore.store({
           value: 'relation-1'
         }).then(function (relation) {
           // Clone in order to rule out side-effects
@@ -148,10 +148,10 @@ describe('Testing shelfdb relations', function() {
             vehicles: [relation]
           };
 
-          return testCollection.store(testItem)
+          return Store.store(testItem)
             .then(function (item) {
 
-              vehiclesCollection.find()
+              VehicleStore.find()
                 .then(function (relations) {
                   expect(relations.length).to.equal(1);
                   expect(_.first(relations).id).to.equal(relation.id);
@@ -165,7 +165,7 @@ describe('Testing shelfdb relations', function() {
     it('does update related items if they have changed',
       function () {
 
-        return vehiclesCollection.store({
+        return VehicleStore.store({
           value: 'relation-1'
         }).then(function (relation) {
           // Clone in order to rule out side-effects
@@ -173,13 +173,13 @@ describe('Testing shelfdb relations', function() {
 
           relation.value = 'relation-2';
 
-          return testCollection.store({
+          return Store.store({
             value: 'test-1',
             vehicles: [relation]
           })
             .then(function (item) {
 
-              vehiclesCollection.find()
+              VehicleStore.find()
                 .then(function (relations) {
                   expect(relations.length).to.equal(1);
                   expect(_.first(relations).id).to.equal(relation.id);
@@ -196,7 +196,7 @@ describe('Testing shelfdb relations', function() {
     it('stores the related item, when saving the parent item',
       function () {
 
-        return testCollection.store({
+        return Store.store({
           value: 'test',
           boat: {
             value: 'relation'
@@ -204,7 +204,7 @@ describe('Testing shelfdb relations', function() {
         })
           .then(function (item) {
 
-            boatCollection.find()
+            BoatStore.find()
               .then(function (relations) {
                 expect(relations.length).to.equal(1);
                 expect(_.first(relations).id).to.exist;
@@ -217,7 +217,7 @@ describe('Testing shelfdb relations', function() {
     it('does not update related item if it has not changed',
       function () {
 
-        return boatCollection.store({
+        return BoatStore.store({
           value: 'relation-1'
         }).then(function (relation) {
           // Clone in order to rule out side-effects
@@ -228,10 +228,10 @@ describe('Testing shelfdb relations', function() {
             boat: relation
           };
 
-          testCollection.store(testItem)
+          Store.store(testItem)
             .then(function (item) {
 
-              boatCollection.find()
+              BoatStore.find()
                 .then(function (relations) {
                   expect(relations.length).to.equal(1);
                   expect(_.first(relations).id).to.equal(relation.id);
@@ -247,7 +247,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare;
 
-        return boatCollection.store({
+        return BoatStore.store({
           value: 'relation-1'
         })
           .then(function (relation) {
@@ -263,10 +263,10 @@ describe('Testing shelfdb relations', function() {
               boat: relation
             };
 
-            return testCollection.store(testItem);
+            return Store.store(testItem);
           })
           .then(function (item) {
-            return boatCollection.find();
+            return BoatStore.find();
           })
           .then(function (relations) {
             expect(relations.length).to.equal(1);
@@ -283,7 +283,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare;
 
-        return testCollection.store({
+        return Store.store({
           value: 'test',
           boat: {
             value: 'relation'
@@ -295,10 +295,10 @@ describe('Testing shelfdb relations', function() {
             item.value = 'changed';
             item.boat.value = 'relation-changed';
 
-            return testCollection.store(item);
+            return Store.store(item);
           })
           .then(function (item) {
-            return boatCollection.find();
+            return BoatStore.find();
           })
           .then(function (relations) {
             expect(relations.length).to.equal(1);
@@ -312,7 +312,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare;
 
-        return testCollection.store({
+        return Store.store({
           value: 'test',
           boat: {
             value: 'relation'
@@ -323,10 +323,10 @@ describe('Testing shelfdb relations', function() {
 
             item.value = 'changed';
 
-            return testCollection.store(item);
+            return Store.store(item);
           })
           .then(function (item) {
-            return boatCollection.find();
+            return BoatStore.find();
           })
           .then(function (relations) {
             expect(relations.length).to.equal(1);
@@ -340,7 +340,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare, relationToCompare;
 
-        return testCollection.store({
+        return Store.store({
           value: 'test',
           boat: {
             value: 'relation'
@@ -352,11 +352,11 @@ describe('Testing shelfdb relations', function() {
 
             item.boat.value = 'relation-changed';
 
-            return testCollection.store(item);
+            return Store.store(item);
           })
           // Assert parent item
           .then(function (item) {
-            return testCollection.find();
+            return Store.find();
           })
           .then(function (items) {
             expect(items.length).to.equal(1);
@@ -364,7 +364,7 @@ describe('Testing shelfdb relations', function() {
           })
           // Assert related item
           .then(function (item) {
-            return boatCollection.find();
+            return BoatStore.find();
           })
           .then(function (relations) {
             expect(relations.length).to.equal(1);
@@ -380,7 +380,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare;
 
-        return testCollection.store({
+        return Store.store({
           value: 'test',
           vehicles: [{
             value: 'relation-1'
@@ -395,10 +395,10 @@ describe('Testing shelfdb relations', function() {
             item.vehicles[0].value = 'relation-changed';
             item.vehicles[1].value = 'relation-changed';
 
-            return testCollection.store(item);
+            return Store.store(item);
           })
           .then(function (item) {
-            return vehiclesCollection.find();
+            return VehicleStore.find();
           })
           .then(function (relations) {
             expect(relations.length).to.equal(2);
@@ -413,7 +413,7 @@ describe('Testing shelfdb relations', function() {
     var persistedItem;
 
     before(function () {
-      return testCollection.store({
+      return Store.store({
         value: 'test',
         vehicles: [{
           value: 'relation-1'
@@ -431,7 +431,7 @@ describe('Testing shelfdb relations', function() {
 
         var itemToCompare;
 
-        return testCollection.find(persistedItem.id)
+        return Store.find(persistedItem.id)
           .then(function (item) {
             expect(item.vehicles).to.exist();
             expect(item.vehicles.length).to.equal(2);

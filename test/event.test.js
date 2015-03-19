@@ -7,33 +7,34 @@
 'use strict';
 
 
-var expect = require('chai').expect;
 var PouchDb = require('pouchdb');
-var shelf = require('../index');
+var PouchDbStore = require('../index');
+
+var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
 
-var collection, sampleData = {};
+var Store, sampleData = {};
 
-PouchDb.plugin(shelf);
+PouchDb.plugin(PouchDbStore);
 
 describe('Testing shelfdb events', function(){
 
   before(function initialize () {
 
-    collection = new PouchDb('tests', {
+    Store = new PouchDb('tests', {
       db: require('memdown')
     }).store();
   });
 
   before(function emptyDb () {
-    return collection.empty();
+    return Store.empty();
   });
 
   before(function populateDb () {
-    return collection.store(_.cloneDeep(require('./fixtures/sample-data.json').values))
+    return Store.store(_.cloneDeep(require('./fixtures/sample-data.json').values))
       .then(function (items) {
         return _.map(items, function (item, index) {
           sampleData[item.value] = item;
@@ -42,11 +43,11 @@ describe('Testing shelfdb events', function(){
   });
 
   after(function clean () {
-    return collection.empty();
+    return Store.empty();
   });
 
   afterEach(function unregisterEventEmitters () {
-    collection.off();
+    Store.off();
   });
 
   describe('using on(event, fnc)', function () {
@@ -54,11 +55,11 @@ describe('Testing shelfdb events', function(){
     it('fires a \'create\' event when storing a new item',
       function (done) {
 
-        collection.on('create', function () {
+        Store.on('create', function () {
           done();
         });
 
-        collection.store({
+        Store.store({
           value: 'test'
         });
       });
@@ -66,11 +67,11 @@ describe('Testing shelfdb events', function(){
     it('fires a \'change\' event when storing a new item',
       function (done) {
 
-        collection.on('change', function () {
+        Store.on('change', function () {
           done();
         });
 
-        collection.store({
+        Store.store({
           value: 'test'
         });
       });
@@ -78,15 +79,15 @@ describe('Testing shelfdb events', function(){
     it('fires an \'update\' event when updating an existing item',
       function (done) {
 
-        collection.on('update', function () {
+        Store.on('update', function () {
           done();
         });
 
-        collection.store({
+        Store.store({
           value: 'test'
         })
           .then(function (item) {
-            collection.store(_.merge(item, {
+            Store.store(_.merge(item, {
               value: 'changed'
             }));
           });
@@ -97,18 +98,18 @@ describe('Testing shelfdb events', function(){
 
         var listen = false;
 
-        collection.on('change', function () {
+        Store.on('change', function () {
           if (listen) {
             done();
           }
         });
 
-        collection.store({
+        Store.store({
           value: 'test'
         })
           .then(function (item) {
             listen = true;
-            collection.store(_.merge(item, {
+            Store.store(_.merge(item, {
               value: 'changed'
             }));
           });
@@ -117,15 +118,15 @@ describe('Testing shelfdb events', function(){
     it('fires a \'change\' event when updating an existing item',
       function (done) {
 
-        collection.store({
+        Store.store({
           value: 'test'
         })
           .then(function (item) {
-            collection.on('change', function () {
+            Store.on('change', function () {
               done();
             });
 
-            collection.store(_.merge(item, {
+            Store.store(_.merge(item, {
               value: 'changed'
             }));
           });
@@ -134,30 +135,30 @@ describe('Testing shelfdb events', function(){
     it('fires a \'delete\' event when removing an existing item',
       function (done) {
 
-        collection.on('delete', function () {
+        Store.on('delete', function () {
           done();
         });
 
-        collection.store({
+        Store.store({
           value: 'test'
         })
           .then(function (item) {
-            collection.remove(item);
+            Store.remove(item);
           });
       });
 
     it('fires a \'change\' event when removing an existing item',
       function (done) {
 
-        collection.store({
+        Store.store({
           value: 'test'
         })
           .then(function (item) {
-            collection.on('change', function () {
+            Store.on('change', function () {
               done();
             });
 
-            collection.remove(item);
+            Store.remove(item);
           });
       });
   });
@@ -173,9 +174,9 @@ describe('Testing shelfdb events', function(){
         var callback = function () {
           callbackCalled++;
 
-          collection.off('change', callback);
+          Store.off('change', callback);
         };
-        collection.on('change', callback);
+        Store.on('change', callback);
 
         // Controll callback to validate deregistration
         var controlGroup = function () {
@@ -185,14 +186,14 @@ describe('Testing shelfdb events', function(){
           }
 
           controlGroupCalled++;
-          collection.store({
+          Store.store({
             value: Math.random()
           });
         };
-        collection.on('change', controlGroup);
+        Store.on('change', controlGroup);
 
         // Start the chain
-        collection.store({
+        Store.store({
           value: 'test'
         });
       });
@@ -212,17 +213,17 @@ describe('Testing shelfdb events', function(){
 
         function deregister () {
           if (callbackCalled.first && callbackCalled.second) {
-            collection.off('change');
+            Store.off('change');
           }
         }
 
         // Event to be deregistered after firing once
-        collection.on('change', function () {
+        Store.on('change', function () {
           callbackCalled.first++;
           deregister();
         });
 
-        collection.on('change', function () {
+        Store.on('change', function () {
           callbackCalled.second++;
           deregister();
         });
@@ -236,14 +237,14 @@ describe('Testing shelfdb events', function(){
           }
 
           controlGroupCalled++;
-          collection.store({
+          Store.store({
             value: Math.random()
           });
         };
-        collection.on('create', controlGroup);
+        Store.on('create', controlGroup);
 
         // Start the chain
-        collection.store({
+        Store.store({
           value: 'test'
         });
       });
@@ -258,7 +259,7 @@ describe('Testing shelfdb events', function(){
         var controlGroupCalled = 0;
 
         // Event to be deregistered after firing once
-        var eventListener = collection.on('change', function () {
+        var eventListener = Store.on('change', function () {
           callbackCalled++;
 
           eventListener.off();
@@ -272,14 +273,14 @@ describe('Testing shelfdb events', function(){
           }
 
           controlGroupCalled++;
-          collection.store({
+          Store.store({
             value: Math.random()
           });
         };
-        collection.on('change', controlGroup);
+        Store.on('change', controlGroup);
 
         // Start the chain
-        collection.store({
+        Store.store({
           value: 'test'
         });
       });

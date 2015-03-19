@@ -6,17 +6,18 @@
 
 'use strict';
 
-var expect = require('chai').expect;
-var shelf = require('../index');
 var PouchDb = require('pouchdb');
+var PouchDbStore = require('../index');
+
+var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
 
-var testCollection, pouch, sampleData = {};
+var Store, pouch, sampleData = {};
 
-PouchDb.plugin(shelf);
+PouchDb.plugin(PouchDbStore);
 
 function clearAllDocs (pouch) {
   return pouch.allDocs()
@@ -31,7 +32,7 @@ describe('Testing shelfdb lookups', function(){
 
   before(function initialize () {
     pouch = new PouchDb('tests', { db: require('memdown') });
-    testCollection = pouch.store();
+    Store = pouch.store();
   });
 
   before(function emptyDb () {
@@ -56,19 +57,19 @@ describe('Testing shelfdb lookups', function(){
 
         var testItem = sampleData['test-1'];
 
-        return testCollection.find(testItem.id)
+        return Store.find(testItem.id)
           .then(function (item) {
             expect(item.id).to.equal(testItem.id);
             expect(item.rev).to.exist;
             expect(item.value).to.equal('test-1');
-            expect(item.toString()).to.equal('[object ModelInstance]');
+            expect(item.toString()).to.equal('[object Item]');
             expect(item.nested.deep.value).to.equal('test-nested-deep-1');
           });
       });
 
     catchIt('throws an \'not-found\' exception when no item is found for the given id',
       function () {
-        return testCollection.find('invalid');
+        return Store.find('invalid');
       });
   });
 
@@ -78,7 +79,7 @@ describe('Testing shelfdb lookups', function(){
 
         var testItem = sampleData['test-1'];
 
-        return testCollection.find({
+        return Store.find({
           value: testItem.value
         })
           .then(function (items) {
@@ -97,7 +98,7 @@ describe('Testing shelfdb lookups', function(){
 
         var testItem = sampleData['test-1'];
 
-        return testCollection.find({
+        return Store.find({
           nested: {
             deep: {
               value: testItem.nested.deep.value
@@ -118,7 +119,7 @@ describe('Testing shelfdb lookups', function(){
     it('returns all items that match the given query with nested queries',
       function () {
 
-        return testCollection.find({
+        return Store.find({
           shared: 'shared'
         })
           .then(function (items) {
@@ -129,7 +130,7 @@ describe('Testing shelfdb lookups', function(){
     it('returns all items that match the given query',
       function () {
 
-        return testCollection.find({
+        return Store.find({
           nested: {
             shared: 'nested-shared'
           }
@@ -139,10 +140,10 @@ describe('Testing shelfdb lookups', function(){
           });
       });
 
-    it('returns an empty array if no entity in the collection matches the query',
+    it('returns an empty array if no entity in the store matches the query',
       function () {
 
-        return testCollection.find({ value: 'invalid' })
+        return Store.find({ value: 'invalid' })
           .then(function (items) {
             expect(items.length).to.equal(0);
           });
@@ -152,9 +153,9 @@ describe('Testing shelfdb lookups', function(){
 
   describe('using find()', function () {
 
-    it('returns all items in the collection',
+    it('returns all items in the store',
       function () {
-        return testCollection.find()
+        return Store.find()
           .then(function (items) {
             expect(items.length).to.equal(5);
           });
@@ -165,7 +166,7 @@ describe('Testing shelfdb lookups', function(){
 
         var testItem = sampleData['test-1'];
 
-        return testCollection.find({
+        return Store.find({
           nested: {
             deep: {
               value: testItem.nested.deep.value
@@ -183,12 +184,12 @@ describe('Testing shelfdb lookups', function(){
           });
       });
 
-    it('returns an empty array if there is no entity in the collection',
+    it('returns an empty array if there is no entity in the store',
       function () {
 
         return clearAllDocs(pouch)
           .then(function () {
-            return testCollection.find()
+            return Store.find()
               .then(function (items) {
                 expect(items.length).to.equal(0);
               });

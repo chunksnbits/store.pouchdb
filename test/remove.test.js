@@ -6,13 +6,14 @@
 
 'use strict';
 
-var expect = require('chai').expect;
-var shelfdb = require('../index');
 var PouchDb = require('pouchdb');
+var PouchDbStore = require('../index');
+
+var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('q');
 
-PouchDb.plugin(shelfdb);
+PouchDb.plugin(PouchDbStore);
 
 var samples = _.cloneDeep(require('./fixtures/sample-data.json').values);
 
@@ -27,18 +28,18 @@ function clearAllDocs (pouch) {
     });
 }
 
-var collection, pouch, sampleData;
+var Store, pouch, sampleData;
 
-describe('Testing shelfdb deletions', function(){
+describe('Testing PouchDbStore deletions', function(){
 
   beforeEach(function populateDb () {
 
     pouch = new PouchDb('tests', { db: require('memdown') });
-    collection = pouch.store();
+    Store = pouch.store();
 
     return clearAllDocs(pouch)
       .then(function () {
-        return collection.store(_.cloneDeep(samples))
+        return Store.store(_.cloneDeep(samples))
           .then(function (items) {
             sampleData = {};
 
@@ -60,9 +61,9 @@ describe('Testing shelfdb deletions', function(){
 
         var testItem = sampleData['test-1'];
 
-        return collection.remove(testItem)
+        return Store.remove(testItem)
           .then(function () {
-            return collection.find(testItem.id)
+            return Store.find(testItem.id)
               .catch(function (error) {
                 expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
                 expect(error.info._original.reason).to.equal('deleted');
@@ -77,9 +78,9 @@ describe('Testing shelfdb deletions', function(){
 
         var testItem = sampleData['test-1'];
 
-        return collection.remove(testItem)
+        return Store.remove(testItem)
           .then(function () {
-            return collection.all()
+            return Store.all()
               .then(function (items) {
                 var mapped = {};
                 _.each(items, function (item) {
@@ -97,13 +98,13 @@ describe('Testing shelfdb deletions', function(){
 
         var item;
 
-        return collection.store(sampleData['test-1'])
+        return Store.store(sampleData['test-1'])
           .then(function (storedItem) {
-            item = _.cloneDeep(storedItem);
-            return collection.remove(storedItem);
+            item = storedItem;
+            return Store.remove(storedItem);
           })
           .then(function () {
-            return collection.remove(item)
+            return Store.remove(item)
               .catch(function (error) {
                 expect(error.name).to.equal('ShelfDocumentUpdateConflict');
                 expect(error.info._original.message).to.equal('Document update conflict');
@@ -122,14 +123,14 @@ describe('Testing shelfdb deletions', function(){
 
         var testItems = [sampleData['test-1'], sampleData['test-2']];
 
-        return collection.remove(testItems)
+        return Store.remove(testItems)
           .then(function () {
-            return collection.find(testItems[0].id)
+            return Store.find(testItems[0].id)
               .catch(function (error) {
                 expect(error.type).to.equal('not-found');
                 expect(error._original.reason).to.equal('deleted');
 
-                collection.find(testItems[1].id)
+                Store.find(testItems[1].id)
                   .catch(function (error) {
                     expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
                     expect(error.info._original.reason).to.equal('deleted');
@@ -145,9 +146,9 @@ describe('Testing shelfdb deletions', function(){
 
         var testItems = [sampleData['test-1'], sampleData['test-2']];
 
-        return collection.remove(testItems)
+        return Store.remove(testItems)
           .then(function () {
-            return collection.all()
+            return Store.all()
               .then(function (items) {
                 var mapped = {};
                 _.each(items, function (item) {
@@ -166,13 +167,13 @@ describe('Testing shelfdb deletions', function(){
 
         var items;
 
-        return collection.store([sampleData['test-1'], sampleData['test-2']])
+        return Store.store([sampleData['test-1'], sampleData['test-2']])
           .then(function (storedItems) {
             items = _.cloneDeep(storedItems);
-            return collection.remove(storedItems);
+            return Store.remove(storedItems);
           })
           .then(function () {
-            return collection.remove(items)
+            return Store.remove(items)
               .catch(function (error) {
                 expect(error.name).to.equal('ShelfDocumentUpdateConflict');
                 expect(error.info._original.message).to.equal('Document update conflict');
@@ -191,11 +192,11 @@ describe('Testing shelfdb deletions', function(){
 
         var testItem = sampleData['test-1'];
 
-        return collection.remove({ value: testItem.value })
+        return Store.remove({ value: testItem.value })
           .then(function () {
             var promises = [];
 
-            return collection.find(testItem.id)
+            return Store.find(testItem.id)
               .catch(function (error) {
                 expect(error.name).to.equal('ShelfDocumentNotFoundConflict');
                 expect(error.info._original.reason).to.equal('deleted');
@@ -208,11 +209,11 @@ describe('Testing shelfdb deletions', function(){
     it('will delete multiple items identified by a query',
       function () {
 
-        return collection.remove({ 'shared': 'shared' })
+        return Store.remove({ 'shared': 'shared' })
           .then(function () {
             var promises = [];
 
-            return collection.all()
+            return Store.all()
               .then(function (items) {
                 expect(items.length).to.equal(1);
               });
@@ -224,9 +225,9 @@ describe('Testing shelfdb deletions', function(){
 
         var testItem = sampleData['test-1'];
 
-        return collection.remove({ value: testItem.value })
+        return Store.remove({ value: testItem.value })
           .then(function () {
-            return collection.all()
+            return Store.find()
               .then(function (items) {
 
                 var mapped = {};
@@ -245,7 +246,7 @@ describe('Testing shelfdb deletions', function(){
 
         var testItem = sampleData['test-1'];
 
-        return collection.remove({ value: 'invalid' })
+        return Store.remove({ value: 'invalid' })
           .then(function (deletedItems) {
             expect(deletedItems.length).to.equal(0);
           });

@@ -6,18 +6,18 @@
 
 'use strict';
 
-var expect = require('chai').expect;
-var shelf = require('../index');
 var PouchDb = require('pouchdb');
+var PouchDbStore = require('../index');
 
+var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
 
-PouchDb.plugin(shelf);
+PouchDb.plugin(PouchDbStore);
 
-var collection, pouch;
+var Store, pouch;
 
 function clearAllDocs (pouch) {
   return pouch.allDocs()
@@ -32,7 +32,7 @@ describe('Testing shelfdb storage', function(){
 
   before(function setUpTestServer () {
     pouch = new PouchDb('tests', { db: require('memdown') });
-    collection = pouch.store();
+    Store = pouch.store();
   });
 
   beforeEach(function () {
@@ -44,7 +44,7 @@ describe('Testing shelfdb storage', function(){
     it('successfully creates a new item with a generated _id',
       function () {
 
-        return collection.store({
+        return Store.store({
           value: 'test'
         }).then(function (storedItem) {
           return pouch.get(storedItem.id, { include_docs: true })
@@ -59,7 +59,7 @@ describe('Testing shelfdb storage', function(){
     it('successfully returns the newly created item',
       function () {
 
-        return collection.store({
+        return Store.store({
           value: 'test'
         }).then(function (storedItem) {
           expect(storedItem.id).to.exist;
@@ -71,7 +71,7 @@ describe('Testing shelfdb storage', function(){
     it('with a single item successfully stores exactly one item',
       function () {
 
-        return collection.store({
+        return Store.store({
           value: 'test'
         }).then(function (storedItem) {
           return pouch.allDocs()
@@ -84,7 +84,7 @@ describe('Testing shelfdb storage', function(){
     it('with an array of n items successfully stores exactly the same number of items',
       function () {
 
-        return collection.store([{
+        return Store.store([{
           value: 'test-1'
         }, {
           value: 'test-2'
@@ -102,7 +102,7 @@ describe('Testing shelfdb storage', function(){
     it('with an array of items successfully stores all items in the array',
       function () {
 
-        return collection.store([{
+        return Store.store([{
           value: 'test-1'
         }, {
           value: 'test-2'
@@ -125,7 +125,7 @@ describe('Testing shelfdb storage', function(){
     it('with an array of items will store the items correctly',
       function () {
 
-        return collection.store([{
+        return Store.store([{
           value: 'test-1'
         }, {
           value: 'test-2'
@@ -159,12 +159,12 @@ describe('Testing shelfdb storage', function(){
     it('will not create another new item',
       function () {
 
-        return collection
+        return Store
           .store({
             value: 'test-1'
           })
           .then(function (item) {
-            return collection.store(_.merge(item, {
+            return Store.store(_.merge(item, {
               value: 'test-2'
             }));
           })
@@ -179,12 +179,12 @@ describe('Testing shelfdb storage', function(){
     it('will succeed in overriding an existing item\'s attribute',
       function () {
 
-        return collection
+        return Store
           .store({
             value: 'test-1'
           })
           .then(function (item) {
-            return collection.store(_.merge(item, {
+            return Store.store(_.merge(item, {
               value: 'test-2'
             }));
           })
@@ -201,12 +201,12 @@ describe('Testing shelfdb storage', function(){
     it('will succeed in adding an attribute to an existing item',
       function () {
 
-        return collection
+        return Store
           .store({
             value: 'test-1'
           })
           .then(function (item) {
-            return collection.store(_.merge(item, {
+            return Store.store(_.merge(item, {
               other: 'test-2'
             }));
           })
@@ -226,13 +226,13 @@ describe('Testing shelfdb storage', function(){
 
         var initial;
 
-        return collection
+        return Store
           .store({
             value: 'test-1'
           })
           .then(function (item) {
             initial = _.cloneDeep(item);
-            return collection.store(item);
+            return Store.store(item);
           })
           .then(function (storedItem) {
             expect(storedItem.rev).to.equal(initial.rev);
@@ -243,10 +243,10 @@ describe('Testing shelfdb storage', function(){
     it('will not create an additional item when using bulk operation',
       function () {
 
-        return collection
+        return Store
           .store([{ value: 'test-1' }, { value: 'test-2' }, { value: 'test-3' }])
           .then(function (storedItems) {
-            return collection.store(_.map(storedItems, function (item) {
+            return Store.store(_.map(storedItems, function (item) {
               item.value = 'test';
               return item;
             }));
@@ -262,10 +262,10 @@ describe('Testing shelfdb storage', function(){
     it('will succeed in udpating multiple items when provided in an array',
       function () {
 
-        return collection
+        return Store
           .store([{ value: 'test-1' }, { value: 'test-2' }, { value: 'test-3' }])
           .then(function (storedItems) {
-            return collection.store(_.map(storedItems, function (item) {
+            return Store.store(_.map(storedItems, function (item) {
               item.value = 'test';
               return item;
             }));
@@ -285,18 +285,18 @@ describe('Testing shelfdb storage', function(){
 
         var revision;
 
-        return collection
+        return Store
           .store({
             value: 'test-1'
           })
           .then(function (item) {
             revision = item.rev;
-            return collection.store(_.merge(item, {
+            return Store.store(_.merge(item, {
               value: 'test-2'
             }));
           })
           .then(function (item) {
-            return collection.store(_.merge(item, {
+            return Store.store(_.merge(item, {
               value: 'test-3',
               rev: revision
             }));

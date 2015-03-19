@@ -1,7 +1,7 @@
 /* jshint node:true */
 'use strict';
 
-var PouchDbStore = require('./lib/shelfdb.js');
+var PouchDbStore = require('./lib/pouchdb-store.js');
 
 var PouchDb;
 

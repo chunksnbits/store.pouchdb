@@ -6,17 +6,19 @@
 
 'use strict';
 
-var expect = require('chai').expect;
-var shelf = require('../index');
 var PouchDb = require('pouchdb');
+var PouchDbStore = require('../index');
+
+var expect = require('chai').expect;
+
 var _ = require('lodash');
 var q = require('q');
 
 require('mocha-qa').global();
 
-var testCollection, pouch, sampleData = {};
+var Store, pouch, sampleData = {};
 
-PouchDb.plugin(shelf);
+PouchDb.plugin(PouchDbStore);
 
 function clearAllDocs (pouch) {
   return pouch.allDocs()
@@ -31,11 +33,11 @@ describe('Testing shelfdb schema', function(){
 
   describe('adding property validations', function () {
 
-    it('will correctly validate a valid model using type definitions',
+    it('will correctly validate a valid item using type definitions',
       function () {
         var memdown = require('memdown');
 
-        var TestCollection = new PouchDb('tests', {
+        var Store = new PouchDb('tests', {
           db: memdown
         }).store({
           properties: {
@@ -48,7 +50,7 @@ describe('Testing shelfdb schema', function(){
           }
         });
 
-        var test = TestCollection.new({
+        var test = Store.new({
           stringValue: 'string',
           numberValue: 123,
           dateValue: new Date(),
@@ -57,15 +59,15 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(TestCollection.validate(test)).to.equal(true);
+        expect(Store.validate(test)).to.equal(true);
         expect(test.validate()).to.equal(true);
       });
 
-    it('will correctly validate a valid model using required definitions',
+    it('will correctly validate a valid item using required definitions',
       function () {
         var memdown = require('memdown');
 
-        var TestCollection = new PouchDb('tests', {
+        var Store = new PouchDb('tests', {
           db: memdown
         }).store({
           properties: {
@@ -78,7 +80,7 @@ describe('Testing shelfdb schema', function(){
           }
         });
 
-        var test = TestCollection.new({
+        var test = Store.new({
           stringValue: 'string',
           numberValue: 123,
           dateValue: new Date(),
@@ -87,11 +89,11 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(TestCollection.validate(test)).to.equal(true);
+        expect(Store.validate(test)).to.equal(true);
         expect(test.validate()).to.equal(true);
       });
 
-    it('will correctly validate a valid model using custom malidations',
+    it('will correctly validate a valid item using custom malidations',
       function () {
         var memdown = require('memdown');
 
@@ -102,7 +104,7 @@ describe('Testing shelfdb schema', function(){
           return true;
         }
 
-        var TestCollection = new PouchDb('tests', {
+        var Store = new PouchDb('tests', {
           db: memdown
         }).store({
           properties: {
@@ -115,7 +117,7 @@ describe('Testing shelfdb schema', function(){
           }
         });
 
-        var test = TestCollection.new({
+        var test = Store.new({
           stringValue: 'string',
           numberValue: 123,
           dateValue: new Date(),
@@ -124,7 +126,7 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(TestCollection.validate(test)).to.equal(true);
+        expect(Store.validate(test)).to.equal(true);
         expect(count).to.equal(6);
 
         count = 0;
@@ -137,7 +139,7 @@ describe('Testing shelfdb schema', function(){
       function () {
         var memdown = require('memdown');
 
-        var TestCollection = new PouchDb('tests', {
+        var Store = new PouchDb('tests', {
           db: memdown
         }).store({
           properties: {
@@ -145,11 +147,11 @@ describe('Testing shelfdb schema', function(){
           }
         });
 
-        var test = TestCollection.new({
+        var test = Store.new({
           value: 123
         });
 
-        expect(TestCollection.validate(test)).to.equal(false);
+        expect(Store.validate(test)).to.equal(false);
         expect(test.validate()).to.equal(false);
       });
 
@@ -157,7 +159,7 @@ describe('Testing shelfdb schema', function(){
       function () {
         var memdown = require('memdown');
 
-        var TestCollection = new PouchDb('tests', {
+        var Store = new PouchDb('tests', {
           db: memdown
         }).store({
           properties: {
@@ -165,11 +167,11 @@ describe('Testing shelfdb schema', function(){
           }
         });
 
-        var test = TestCollection.new({
+        var test = Store.new({
           value: 'string'
         });
 
-        expect(TestCollection.validate(test)).to.equal(false);
+        expect(Store.validate(test)).to.equal(false);
         expect(test.validate()).to.equal(false);
       });
 
@@ -177,7 +179,7 @@ describe('Testing shelfdb schema', function(){
         function () {
           var memdown = require('memdown');
 
-          var TestCollection = new PouchDb('tests', {
+          var Store = new PouchDb('tests', {
             db: memdown
           }).store({
             properties: {
@@ -185,11 +187,11 @@ describe('Testing shelfdb schema', function(){
             }
           });
 
-          var test = TestCollection.new({
+          var test = Store.new({
             value: 'string'
           });
 
-          expect(TestCollection.validate(test)).to.equal(false);
+          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -198,7 +200,7 @@ describe('Testing shelfdb schema', function(){
         function () {
           var memdown = require('memdown');
 
-          var TestCollection = new PouchDb('tests', {
+          var Store = new PouchDb('tests', {
             db: memdown
           }).store({
             properties: {
@@ -206,11 +208,11 @@ describe('Testing shelfdb schema', function(){
             }
           });
 
-          var test = TestCollection.new({
+          var test = Store.new({
             value: undefined
           });
 
-          expect(TestCollection.validate(test)).to.equal(false);
+          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -218,7 +220,7 @@ describe('Testing shelfdb schema', function(){
         function () {
           var memdown = require('memdown');
 
-          var TestCollection = new PouchDb('tests', {
+          var Store = new PouchDb('tests', {
             db: memdown
           }).store({
             properties: {
@@ -226,11 +228,11 @@ describe('Testing shelfdb schema', function(){
             }
           });
 
-          var test = TestCollection.new({
+          var test = Store.new({
             value: []
           });
 
-          expect(TestCollection.validate(test)).to.equal(false);
+          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -238,7 +240,7 @@ describe('Testing shelfdb schema', function(){
         function () {
           var memdown = require('memdown');
 
-          var TestCollection = new PouchDb('tests', {
+          var Store = new PouchDb('tests', {
             db: memdown
           }).store({
             properties: {
@@ -246,11 +248,11 @@ describe('Testing shelfdb schema', function(){
             }
           });
 
-          var test = TestCollection.new({
+          var test = Store.new({
             value: {}
           });
 
-          expect(TestCollection.validate(test)).to.equal(false);
+          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
   });
