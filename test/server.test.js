@@ -41,7 +41,7 @@ describe('Testing shelfdb server', function () {
         server = app.listen(1234);
 
         http.get('http://localhost:1234/test', function (response) {
-          expect(response).to.exist;
+          expect(response.statusCode).to.be.equal(200);
           done();
         })
         .on('error', function(error) {
@@ -57,8 +57,8 @@ describe('Testing shelfdb server', function () {
 
           server = app.listen(1234);
 
-          http.get('http://localhost:1234/root/test', function (response) {
-            expect(response).to.exist;
+          http.get('http://localhost:1234/store/test', function (response) {
+            expect(response.statusCode).to.be.equal(200);
             done();
           })
           .on('error', function(error) {
@@ -77,7 +77,7 @@ describe('Testing shelfdb server', function () {
         server = app.listen(1234);
 
         http.get('http://localhost:1234/test', function (response) {
-          expect(response).to.exist;
+          expect(response.statusCode).to.be.equal(200);
           done();
         })
         .on('error', function(error) {
@@ -91,8 +91,8 @@ describe('Testing shelfdb server', function () {
 
           server = app.listen(1234);
 
-          http.get('http://localhost:1234/root/test', function (response) {
-            expect(response).to.exist;
+          http.get('http://localhost:1234/store/test', function (response) {
+            expect(response.statusCode).to.be.equal(200);
             done();
           })
           .on('error', function(error) {
