@@ -1,11 +1,8 @@
 /* jshint node:true */
 'use strict';
 
-var PouchDbStore = require('./lib/pouchdb-store.js');
-
-var PouchDb;
-
-var stores = {};
+var PouchDbStore = require('./lib/pouchdb-store');
+var StoreLoader = require('./lib/pouchdb-store-loader');
 
 module.exports = {
   //
@@ -30,17 +27,6 @@ module.exports = {
   //   ...
   //
   open: function (dbName, options) {
-
-    if (!PouchDb) {
-      PouchDb = require('pouchdb');
-      PouchDb.plugin(PouchDbStore);
-    }
-
-    if (!stores[dbName]) {
-      var pouch = new PouchDb(dbName, options);
-      stores[dbName] = PouchDbStore.load(pouch, options);
-    }
-
-    return stores[dbName];
+    return StoreLoader.load(dbName, options);
   }
 };

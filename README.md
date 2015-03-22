@@ -24,7 +24,7 @@ var PouchDb = require('pouchdb');
 // Initialize pouchdb-store
 PouchDb.plugin(require('pouchdb-store'));
 // ...
-var Records = new PouchDb('records').store();
+var Records = new PouchDb('records').store({ /* options*/ });
 
 Records.store({
   artist: 'Superfunk',
@@ -38,7 +38,7 @@ Convenience method for creating a PouchDb Store without  handling any additional
 
 ``` javascript
 var PouchDbStore = require('pouchdb-store');
-var Records = PouchDbStore.open('records');
+var Records = PouchDbStore.open('records', { /* options */ });
 
 Records.store({
   artist: 'Superfunk',
