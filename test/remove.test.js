@@ -80,7 +80,7 @@ describe('Testing PouchDbStore deletions', function(){
 
         return Store.remove(testItem)
           .then(function () {
-            return Store.all()
+            return Store.find()
               .then(function (items) {
                 var mapped = {};
                 _.each(items, function (item) {
@@ -148,7 +148,7 @@ describe('Testing PouchDbStore deletions', function(){
 
         return Store.remove(testItems)
           .then(function () {
-            return Store.all()
+            return Store.find()
               .then(function (items) {
                 var mapped = {};
                 _.each(items, function (item) {
@@ -213,7 +213,7 @@ describe('Testing PouchDbStore deletions', function(){
           .then(function () {
             var promises = [];
 
-            return Store.all()
+            return Store.find()
               .then(function (items) {
                 expect(items.length).to.equal(1);
               });
