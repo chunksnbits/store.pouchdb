@@ -1,8 +1,8 @@
 /* jshint node:true */
 'use strict';
 
-var PouchDbStore = require('./lib/pouchdb-store');
-var StoreLoader = require('./lib/pouchdb-store-loader');
+var PouchDbStore = require('./lib/store');
+var StoreLoader = require('./lib/store-loader');
 
 module.exports = {
   //
