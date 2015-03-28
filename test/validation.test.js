@@ -31,16 +31,16 @@ function clearAllDocs (pouch) {
 
 describe('Testing shelfdb schema', function(){
 
-  describe('adding property validations', function () {
+  describe('adding validations', function () {
 
-    it('will correctly validate a valid item using type definitions',
+    it('will correctly validate an item using type definitions',
       function () {
         var memdown = require('memdown');
 
         var Store = new PouchDb('tests', {
           db: memdown
         }).store({
-          properties: {
+          validates: {
             stringValue: 'string',
             numberValue: 'number',
             dateValue: 'date',
@@ -59,7 +59,6 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(Store.validate(test)).to.equal(true);
         expect(test.validate()).to.equal(true);
       });
 
@@ -70,7 +69,7 @@ describe('Testing shelfdb schema', function(){
         var Store = new PouchDb('tests', {
           db: memdown
         }).store({
-          properties: {
+          validates: {
             stringValue: { required: true },
             numberValue: { required: true },
             dateValue: { required: true },
@@ -89,11 +88,10 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(Store.validate(test)).to.equal(true);
         expect(test.validate()).to.equal(true);
       });
 
-    it('will correctly validate a valid item using custom malidations',
+    it('will call a custom validation function for each property specified',
       function () {
         var memdown = require('memdown');
 
@@ -107,7 +105,7 @@ describe('Testing shelfdb schema', function(){
         var Store = new PouchDb('tests', {
           db: memdown
         }).store({
-          properties: {
+          validates: {
             stringValue: customValidation,
             numberValue: customValidation,
             dateValue: customValidation,
@@ -126,11 +124,7 @@ describe('Testing shelfdb schema', function(){
           arrayValue: [1,2,3]
         });
 
-        expect(Store.validate(test)).to.equal(true);
-        expect(count).to.equal(6);
-
-        count = 0;
-        expect(test.validate()).to.equal(true);
+        test.validate();
         expect(count).to.equal(6);
       });
 
@@ -142,7 +136,7 @@ describe('Testing shelfdb schema', function(){
         var Store = new PouchDb('tests', {
           db: memdown
         }).store({
-          properties: {
+          validates: {
             value: 'string'
           }
         });
@@ -151,7 +145,6 @@ describe('Testing shelfdb schema', function(){
           value: 123
         });
 
-        expect(Store.validate(test)).to.equal(false);
         expect(test.validate()).to.equal(false);
       });
 
@@ -162,7 +155,7 @@ describe('Testing shelfdb schema', function(){
         var Store = new PouchDb('tests', {
           db: memdown
         }).store({
-          properties: {
+          validates: {
             value: 'number'
           }
         });
@@ -171,7 +164,6 @@ describe('Testing shelfdb schema', function(){
           value: 'string'
         });
 
-        expect(Store.validate(test)).to.equal(false);
         expect(test.validate()).to.equal(false);
       });
 
@@ -182,7 +174,7 @@ describe('Testing shelfdb schema', function(){
           var Store = new PouchDb('tests', {
             db: memdown
           }).store({
-            properties: {
+            validates: {
               value: 'date'
             }
           });
@@ -191,7 +183,6 @@ describe('Testing shelfdb schema', function(){
             value: 'string'
           });
 
-          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -203,7 +194,7 @@ describe('Testing shelfdb schema', function(){
           var Store = new PouchDb('tests', {
             db: memdown
           }).store({
-            properties: {
+            validates: {
               value: 'boolean'
             }
           });
@@ -212,7 +203,6 @@ describe('Testing shelfdb schema', function(){
             value: undefined
           });
 
-          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -223,7 +213,7 @@ describe('Testing shelfdb schema', function(){
           var Store = new PouchDb('tests', {
             db: memdown
           }).store({
-            properties: {
+            validates: {
               value: 'object'
             }
           });
@@ -232,7 +222,6 @@ describe('Testing shelfdb schema', function(){
             value: []
           });
 
-          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
 
@@ -243,7 +232,7 @@ describe('Testing shelfdb schema', function(){
           var Store = new PouchDb('tests', {
             db: memdown
           }).store({
-            properties: {
+            validates: {
               value: 'array'
             }
           });
@@ -252,7 +241,6 @@ describe('Testing shelfdb schema', function(){
             value: {}
           });
 
-          expect(Store.validate(test)).to.equal(false);
           expect(test.validate()).to.equal(false);
         });
   });
