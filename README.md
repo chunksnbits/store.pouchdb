@@ -1,21 +1,21 @@
 # Introduction
 
-Store-PouchDb is a simple interface wrapper around [PouchDB](http://pouchdb.com/api.html) offline first database.
+Store.PouchDb is a simple interface wrapper plugin around [PouchDB](http://pouchdb.com/api.html) offline first database.
 
-Inspired by the [Dreamcode API](http://nobackend.org/dreamcode.html) project and the Ruby on Rails [Active Record](http://guides.rubyonrails.org/active_record_basics.html) pattern this project aims to provide a simple interface to access often used request methods like `store` and `find` as well as providing helpers to allow relationship mapping between multiple databases.
+Inspired by the [Dreamcode API](http://nobackend.org/dreamcode.html) project and object relational mappers like the Ruby on Rails [Active Record](http://guides.rubyonrails.org/active_record_basics.html) pattern this project aims to provide a simple interface to access often used request methods like `store` and `find` as well as providing helpers to allow relationship mapping between multiple databases.
 
 # Installation
 
 ``` bash
-npm install --save store-pouchdb
+npm install --save store.pouchdb
 ```
 
 # Setup
 
-Setup Store-PouchDb using the [PouchDb plugin](http://pouchdb.com/api.html#plugins) notation:
+Setup Store.PouchDb using the [PouchDb plugin](http://pouchdb.com/api.html#plugins) notation:
 
 ``` javascript
-var PouchDb = require('pouchdb').plugin(require('pouchdb-store'));
+var PouchDb = require('pouchdb').plugin(require('store.pouchdb'));
 ```
 
 After this you can create new stores from any [PouchDb database](http://pouchdb.com/api.html#create_database) using the `store()` method on the database object:
@@ -31,44 +31,40 @@ Records.store({
 
 # API
 
-* Store
-  * Store.store(new)
-  * Store.store(item, [...])
-  * Store.find(id)
-  * Store.find(query)
-  * Store.find()
-  * Store.remove(item, [...])
-  * Store.empty()  
-* Syncronization
-  * Store.sync(name, options)
-* Item
-  * Store.new()
-  * item.store()
-  * item.remove()
-  * Metadata
-* Associations
-  * Store.hasMany(name, [store])
-  * Store.hasOne(name, [store])
-* Validations
-  * Store.property(name, validations)
-* Events
-  * Store.on(event, callback)
-  * Store.off(event, callback)
-  * listener.cancel()
-* Creation
-  * PouchDb.store(options)
+* [Store](#store)
+  * [Store.store(:object [,...])](#store-store)
+  * [Store.find(:id)](#store-find-id)
+  * [Store.find(:query)](#store-find-query)
+  * [Store.find()](#store-find-all)
+  * [Store.remove(:item [,...])](#store-remove)
+  * [Store.empty()](#store-empty)
+* [Syncronization](#store-sync)
+  * [Store.sync(:name [,:options])](#store-sync)
+* [Item](#item)
+  * [Store.new()](#store-new)
+  * [item.store()](#item-store)
+  * [item.remove()](#item-remove)
+  * [item.$info](#item-info)
+* [Properties](#properties)
+  * [Store.hasMany(:property [,:store])](#properties-hasMany)
+  * [Store.hasOne(:property [,:store])](#properties-hasOne)
+  * [Store.validates(:property, :validation)](#properties-validates)
+  * [Store.schema(:schema)](#properties-schema)
+* [Events](#events)
+  * [Store.on(:event, :callback)](#store-on)
+  * [listener.cancel()](#listener-cancel)
 
 
-# Store
+# Store<a name="store"></a>
 
-## Store.store(:object [,...])
+## Store.store(:item [,...])<a name="store-store"></a>
 
-Basic persistence methods for the store. Takes one or more [items](#Items) or plain objects and creates or updates them in the database of this store.
+Basic persistence methods for the store. Takes one or more [items](#item) or plain objects and creates or updates them in the database of this store.
 
-* Initializes a new id (optional, can also be set manually) and [revision](#Revisions) when called initially on an item or object
-* Returns a [promise](#promises) that on resolution returns the updated [item](#Items) instance(s).
+* Initializes a new id (optional, can also be set manually) and [revision](#item.rev) when called initially on an item or object
+* Returns a [promise](#promises) that on resolution returns the updated [item](#item) instance(s).
 * On storage each item will be validated against the [schema](#schema) of this Store.
-* Will recursively store all one-to-one / one-to-many [associations](#Associations) defined for this store.
+* Will recursively store all one-to-one / one-to-many [associations](#properties.has-many) defined for this store.
 * Will not update the item if none of the attributes have been changed (i.e., deep-equals is true).
 
 ### Example (Single)
@@ -99,10 +95,12 @@ Users.store(john)
   .then(/* handle response */);
 ```
 
-## Store.find(:id)
+## Store.find(:id)<a name="store-find-id"></a>
 
-Looks up a single [item](#Items) by it's id. Will return a [promise](#promises) that on resolution will return the item for the requested id.
-The promise will be rejected if you item could be found for the given id.
+Looks up a single [item](#item) by it's id.
+
+* Returns a [promise](#promises) that on resolution will return the item for the requested id.
+* The promise will be rejected if you item could be found for the given id.
 
 ### Example
 
@@ -116,10 +114,12 @@ Users.find('uid-123456')
   });
 ```
 
-## Store.find(:query)
+## Store.find(:query)<a name="store-find-query"></a>
 
-Looks up all [items](#Items) that match the given query object. Will return a [promise](#Promises) that on resolution will return an array with all items that matched the query. Will return an empty array if no items could be found.
+Looks up all [items](#item) that match the given query object.
 
+* Returns a [promise](#promises) that on resolution will return an array with all items that matched the query.
+* Returns an empty array if no items could be found.
 * The query can be nested and will be evaluated recursively
 
 ### Example
@@ -131,9 +131,12 @@ Users.find({ name: 'John' })
   });
 ```
 
-### Store.find()
+### Store.find()<a name="store-find-all"></a>
 
-Looks up all [itens](#Items) currently kept in the store. Will return a [promise](#promises) that on resolution will provide all items currently stored in this store or an empty array if the store is empty.
+Looks up all [itens](#item) currently kept in the store.
+
+* Returns a [promise](#promises) that on resolution will provide all items currently stored in this store.
+* Returns an empty array if the store is empty.
 
 ### Example
 
@@ -144,9 +147,11 @@ Users.find()
   });
 ```
 
-## Store.remove(:item)
+## Store.remove(:item)<a name="store-remove"></a>
 
-Removes the given [item](#Items) from the store. Will return a promise that will be resolved once the item has successfully been removed from the store.
+Removes the given [item](#item) from the store.
+
+* Returns a promise that will be resolved once the item has successfully been removed from the store.
 
 ### Example
 
@@ -157,9 +162,11 @@ Records.remove(record)
   });
 ```
 
-## Store.empty()
+## Store.empty()<a name="store-empty"></a>
 
-Removes all [items](#Items) from the store. Will return a promise that will be resolved once all items have successfully been removed from the store.
+Removes all [items](#item) from the store.
+
+* Returns a promise that will be resolved once all items have successfully been removed from the store.
 
 ### Example
 
@@ -170,15 +177,15 @@ Records.empty()
   });
 ```
 
-# Synchronization
+# Synchronization<a name="store-sync"></a>
 
-## Store.sync(:store [, options])
+## Store.sync(:store [,:options])
 
 Sets up (live) synchronization between multiple stores.
 
 * Equivalent to [PouchDB Sync](http://pouchdb.com/api.html#sync)
 * By default will set those PouchDb options: `{ live: true, retry: true }`
-* See [events](#Events) for listening to either of the synchronized stores
+* See [events](#events) for listening to either of the synchronized stores
 
 ### Example
 
@@ -189,11 +196,14 @@ var Tracks = new PouchDb('tracks').store();
 Tracks.sync('http://138.231.22.16:9073/pouch/tracks');
 ```
 
-# Items
+# Items<a name="item"></a>
 
-## Store.new([:object])
+## Store.new([:data])<a name="store-new"></a>
 
-Creates a new item instance. If the optional data object is provided the item will be initialized with the values provided.
+Creates a new item instance.
+
+* The instance will not have been persisted at this point, i.e., it will not have been assigned it's id and initial [revions](#item.rev) yet
+* If the optional data object is provided the item will be initialized with the values provided.
 
 ### Example
 
@@ -208,17 +218,16 @@ var jane = Users.new({ name: 'Jane' });
 jane.store();
 ```
 
-## item.store()
+## item.store()<a name="item-store"></a>
 
 Stores the item in the [store](#store) used for the creation of this item.
-If not previously stored, creates a new id (which can also be provided) and rev for the item.
-Updates the item on each subsequent call.
 
-Returns a [promise](#promises) that on resolution will return the item, updated with a new id (on first store) and id (increases with each subsequent update).
-
-* Will be validated against the [schema](#schema) of this Store.
+* If not previously stored, creates a new id (which can also be provided) and rev for the item.
+* Updates the item on each subsequent call.
+* Returns a [promise](#promises) that on resolution will return the updated item
+* Will be validated against the [schema](#store.schema) of this Store.
 * Will not update the item if none of the attributes have been changed (i.e., deep-equals is true).
-* Will recursively store all one-to-one / one-to-many [associations](#Associations) defined for this store.
+* Will recursively store all one-to-one / one-to-many [associations](#properties.has-many) defined for this store.
 * This method is the instance equivalent to `Store.store(item);`
 
 ### Example
@@ -232,11 +241,11 @@ john.save()
   });
 ```
 
-## item.remove()
+## item.remove()<a name="item-remove"></a>
 
 Removes the item from the [store](#store) used for the creation of this item.
-Returns a promise that will be resolved once the item has been successfully deleted.
 
+* Returns a promise that will be resolved once the item has been successfully deleted.
 * This method is the instance equivalent to `Store.remove(item);`
 
 ### Example
@@ -245,38 +254,50 @@ Returns a promise that will be resolved once the item has been successfully dele
 var john = Users.new(/* properties */);
 
 // ... do magic
-
 john.remove();
 ```
 
-# Metadata
+# item.$info<a name="item-info"></a>
 
 Each item will automatically be extended by the following fields:
 
 TODO...
 
-# Associations
+# item.rev<a name="item-rev"></a>
 
-Associations can be defined as either one-to-one or one-to-many relations between two or more stores.
+Each store operation will update an items revision (`rev`).
+
+* A revision indicates a specific version of an item.
+* By default Store.PouchDb will keep all revisions of an item
+* Refer to the [PouchDb API](http://pouchdb.com/api.html) for further details on revision handling
+
+# Properties<a name="properties"></a>
+
+There are two kind of properties that can be defined on a store.
+
+Associations define the relationship between items of two associated stores. Associations can be defined as either one-to-one or one-to-many relations.
 
 * Associated items are stored as separate entities in the store specified by the relation.
 * Associated items are stored autimatically when the parent item is stored.
 * Associated items are loaded automaticaly when loading the parent item.
 * Associated items can be stored / queried independently from their parent.
 
-## Store.hasMany(:name [, :store])
+Validations allow to restrict the charasteristics of certain properties within the item model to be stored.
+
+## Store.hasMany(:property [,:store])<a name="properties-has-many"></a>
 
 Defines a one-to-many association to the store.
-This association is especially helpful if you either need to handle the association items independent from each other, e.g., in different modules, or will (often) update the content of the associated items independently from each other.
 
 * Provide a store argument if the name of the property and the name of the store do not match.
-* The store argument can be be either as string with the name of the store or [store](#Store) instance.
-* If you want to nest associations deeper than one level you must provide each store argument as a [store](#Store) instance
+* The store argument can be be either as string with the name of the store or [store](#store) instance.
+* If you want to nest associations deeper than one level you must provide each store argument as a [store](#store) instance
+
+This association is especially helpful if you either need to handle the association items independent from each other, e.g., in different modules, or will (often) update the content of the associated items independently from each other.
 
 ### Example
 
 Consider a data-model for one playlist that contains many tracks, with the tracks updated often, e.g., updating their playback state.
-Using a nested approach would cause an update, i.e., a new [revision](#Revisions), of the playlist whenever any of the associated tracks are updated. Using the hasMany association you can update the track without updating the playlist, while still keeping easy access to the nesting of.
+Using a nested approach would cause an update, i.e., a new [revision](#revisions), of the playlist whenever any of the associated tracks are updated. Using the hasMany association you can update the track without updating the playlist, while still keeping easy access to the nesting of.
 
 ``` javascript
 Playlists.hasMany('tracks');
@@ -286,14 +307,15 @@ playlist.tracks[0].played++;
 playlist.store();  // Updates the first track, but causes no new revision for the playlist
 ```
 
-## Store.hasOne
+## Store.hasOne(:property [,:store])<a name="properties-has-one"></a>
 
 Defines a one-to-one relation for the store.
-Use the hasOne relation to keep the associated items as separate entities, that can be loaded independently from each other, e.g., for usage in different modules.
 
 * Provide a store argument if the name of the property and the name of the store do not match.
-* The store argument can be be either as string with the name of the store or [store](#Store) instance.
-* If you want to nest associations deeper than one level you must provide each store argument as a [store](#Store) instance
+* The store argument can be be either as string with the name of the store or [store](#store) instance.
+* If you want to nest associations deeper than one level you must provide each store argument as a [store](#store) instance
+
+Use the hasOne relation to keep the associated items as separate entities, that can be loaded independently from each other, e.g., for usage in different modules.
 
 ### Example
 
@@ -310,16 +332,20 @@ assert(track.artist.id === artist.id);    // true
 assert(track.artist.name === artist.name);    // true
 ```
 
-# Validations
+## Store.validates(:property, :validation)<a name="properties-validates"></a>
 
-## Store.properties
+Allows to restrict the type and characterisitics that certain properties of an item must apply to, before they can be stored in the associated store. The following validations are available:
 
-Allows to restrict the properties to be considered for persistence and apply validation rules that values for this properties must match.
-The following validations are available:
-
-* type (string): Allows to specify the type of the property. Possible values are: `string`, `number`, `boolean`, `date`, `object` or `array`
-* required (boolean): Flags the property to be obligatory for storing the item.
-* validate (function): Allows to give a function that is executed for the property whenever the item is stored.
+* Takes either a string argument indicating the type of the property or an object defining at least one of:
+  * type: Expects a `string`. Allows to specify the type of the property. Possible values are:
+    * `string`
+    * `number`
+    * `boolean`
+    * `date`
+    * `object`
+    * `array`
+  * required: Expects a `boolean`. Flags the property to be obligatory for storing this item.
+  * validate: Expects a `function`. Allows to give a function that is executed for the property whenever this item is stored.
 
 ### Example
 
@@ -327,16 +353,16 @@ The following validations are available:
 var Tracks = new PouchDb('tracks').store();
 
 // Ensures the type of the 'length' property
-Tracks.property('length', 'number');
+Tracks.validates('length', 'number');
 
 // Ensures 'url' is provided
-Tracks.property('url', {
+Tracks.validates('url', {
   type: 'string',
   required: true
 });
 
 // Ensures 'artist' has a non-empty name
-Tracks.property('artist', {
+Tracks.validates('artist', {
   type: 'object',
   validate: function (artist, track) {
     return artist.name && artist.name.length;
@@ -344,9 +370,9 @@ Tracks.property('artist', {
 });
 ```
 
-## Store.schema
+## Store.schema(:schema)<a name="properties-schema"></a>
 
-Convenience method to apply multiple association and property specifications in a single call.
+Convenience method to apply multiple association and validation specifications in a single call.
 
 ### Example
 
@@ -356,7 +382,7 @@ MyStore.schema({
     artist: 'artists'
   }],
   hasMany: ['comments', 'likes'],
-  properties: [{
+  validates: [{
     length: 'number',
     artist: {
       type: 'object',
@@ -366,14 +392,14 @@ MyStore.schema({
 });
 ```
 
-# Events
+# Events<a name="events"></a>
 
 Events provide a method to listen to changes made to the store
 
-## Store.on(:event, :callback)
+## Store.on(:event, :callback)<a name="store-on"></a>
 
 Subscribes to the event provided, causing the callback to be called whenever the event is recorded on any store item.
-Returns a listener object that allows to keep track of the subscription and [cancel](listener.cancel()) it if no longer needed.
+Returns a listener object that allows to keep track of the subscription and [cancel](listener.cancel) it if no longer needed.
 
 ### Example
 
@@ -383,12 +409,24 @@ var listener = MyStore.on('update', function () {
 });
 ```
 
-## listener.off()
+## listener.off()<a name="listener-off"></a>
 
-Applies to the listener object returned by the [on](#Store.on(:event [,:callback])) function.
+Applies to the listener object returned by the [on](#store.on)) function.
 The listener allows to keep track of the subscription and provides an alternative way to cancel the listener if no longer needed.
 
 ``` javascript
 var listener = MyStore.on('update', function () {/* the magic happens here */});
 listener.off();
 ```
+
+# Promises<a name="promises"></a>
+
+Store.PouchDb uses the [bluebird promise library](https://github.com/petkaantonov/bluebird). For further details on available methods see the [API documentation](https://github.com/petkaantonov/bluebird/blob/master/API.md).
+
+The most commonly used methods are:
+
+* [promise.then(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#thenfunction-fulfilledhandler--function-rejectedhandler----promise) - Executes the given callback function once the promise has been fulfilled.
+* [promise.catch(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#catchfunction-handler---promise) - Executes the given callback function if the promise gets rejected, e.g., because of a conflict or exception.
+* [promise.map(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#mapfunction-mapper--object-options---promise) - Executes the given map-function on each item of the promise previous result and returns the manipulated result set.
+* [promise.reduce(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#reducefunction-reducer--dynamic-initialvalue---promise) - Executes the given reduce-function on each item of the previous promise result and returns a single result.
+* [promise.filter(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#filterfunction-filterer--object-options---promise) - Executes the given filter-function on each item of the previous promise result and allows to filter items on the criteria defined in the callback function.
