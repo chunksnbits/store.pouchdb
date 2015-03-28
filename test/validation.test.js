@@ -12,7 +12,7 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 
 var _ = require('lodash');
-var q = require('q');
+var q = require('bluebird');
 
 require('mocha-qa').global();
 

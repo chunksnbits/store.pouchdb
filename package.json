@@ -1,8 +1,15 @@
 {
-  "name": "shelfdb",
+  "name": "store.pouch",
   "version": "0.1.0",
-  "description": "A simple wrapper model for the pouchdb database",
+  "description": "Inteface wrapper plugin for pouchdb offline first database",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chunksnbits/store.pouch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chunksnbits/store.pouch/issues"
+  },
   "scripts": {
     "browserify": "./node_modules/.bin/browserify tmp/suite.js -o tmp/tests.js --ignore-missing",
     "clean": "rm -rf tmp",
@@ -13,24 +20,39 @@
   },
   "keywords": [
     "pouchdb",
+    "pouch",
+    "store",
+    "save",
+    "update",
+    "delete",
+    "model",
+    "crud",
+    "local-storage",
+    "offline-first",
+    "node",
+    "orm",
     "db",
-    "mongo"
+    "mongodb"
   ],
   "author": "daniel.eissing@gmx.net",
   "browser": {
     "mkdirp": false,
     "express-pouchdb": false
   },
-  "license": "MIT",
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  ],
   "dependencies": {
-    "lodash": "^3.0.0",
+    "bluebird": "^2.9.16",
     "deep-equal": "^1.0.0",
     "detect-node": "^2.0.3",
-    "express": "^4.11.2",
     "express-pouchdb": "^0.14.0",
+    "lodash": "^3.0.0",
     "mkdirp": "^0.5.0",
-    "pouchdb": "^3.3.1",
-    "q": "^1.1.2"
+    "pouchdb": "^3.3.1"
   },
   "devDependencies": {
     "browserify": "^8.1.3",
