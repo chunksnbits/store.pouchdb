@@ -1,5 +1,3 @@
-# Introduction
-
 Store.PouchDb is a simple interface wrapper plugin around [PouchDB](http://pouchdb.com/api.html) offline first database.
 
 Inspired by the [Dreamcode API](http://nobackend.org/dreamcode.html) project and object relational mappers like the Ruby on Rails [Active Record](http://guides.rubyonrails.org/active_record_basics.html) pattern this project aims to provide a simple interface to access often used request methods like `store` and `find` as well as providing helpers to allow relationship mapping between multiple databases.
@@ -261,7 +259,9 @@ john.remove();
 
 Each item will automatically be extended by the following fields:
 
-TODO...
+* `$info.createdAt` - The time of creation for this item
+* `$info.updatedAt` - The last time this item has been updated.
+* `$info.store` - The name of the store that holds this item.
 
 # item.rev<a name="item-rev"></a>
 

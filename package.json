@@ -1,7 +1,7 @@
 {
   "name": "store.pouch",
   "version": "0.1.0",
-  "description": "Inteface wrapper plugin for pouchdb offline first database",
+  "description": "ORM-style storage plugin for the PouchDb database",
   "main": "index.js",
   "repository": {
     "type": "git",
