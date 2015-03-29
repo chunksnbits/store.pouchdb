@@ -27,16 +27,6 @@ Records.store({
 });
 ```
 
-# Contributions
-
-Contributions are very welcome, both as pull requests or just in the form of discussion.
-
-# Roadmap / Open Topics
-
-* Improve performance, especially on find operations
-* Clean up and improve test cases
-* Finalize API
-
 # API
 
 * [Store](#store)
@@ -440,3 +430,13 @@ The most commonly used methods are:
 * [promise.map(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#mapfunction-mapper--object-options---promise) - Executes the given map-function on each item of the promise previous result and returns the manipulated result set.
 * [promise.reduce(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#reducefunction-reducer--dynamic-initialvalue---promise) - Executes the given reduce-function on each item of the previous promise result and returns a single result.
 * [promise.filter(:callback)](https://github.com/petkaantonov/bluebird/blob/master/API.md#filterfunction-filterer--object-options---promise) - Executes the given filter-function on each item of the previous promise result and allows to filter items on the criteria defined in the callback function.
+
+# Contributions
+
+Contributions are very welcome, both as pull requests or just in the form of discussion.
+
+# Roadmap / Open Topics
+
+* Improve performance, especially on find operations
+* Clean up and improve test cases
+* Finalize API
