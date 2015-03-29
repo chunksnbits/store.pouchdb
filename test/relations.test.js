@@ -229,10 +229,10 @@ describe('Testing PouchDbStore relations', function() {
             boat: relation
           };
 
-          Store.store(testItem)
+          return Store.store(testItem)
             .then(function (item) {
 
-              BoatStore.find()
+              return BoatStore.find()
                 .then(function (relations) {
                   expect(relations.length).to.equal(1);
                   expect(_.first(relations).id).to.equal(relation.id);
