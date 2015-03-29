@@ -437,6 +437,7 @@ Contributions are very welcome, both as pull requests or just in the form of dis
 
 # Roadmap / Open Topics
 
+* Clean up library structure - extract pouch adapter into separate repository and decouple store from PouchDb specific implementation
 * Improve performance, especially on find operations (see [PouchDb guide on using views](http://pouchdb.com/guides/queries.html))
 * Clean up and improve test cases
 * Finalize API
