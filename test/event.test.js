@@ -31,7 +31,7 @@ describe('Testing shelfdb events', function(){
   });
 
   before(function emptyDb () {
-    return Store.empty();
+    return Store.remove();
   });
 
   before(function populateDb () {
@@ -44,7 +44,7 @@ describe('Testing shelfdb events', function(){
   });
 
   after(function clean () {
-    return Store.empty();
+    return Store.remove();
   });
 
   afterEach(function unregisterEventEmitters () {

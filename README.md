@@ -27,6 +27,16 @@ Records.store({
 });
 ```
 
+# Contributions
+
+Contributions are very welcome, both as pull requests or just in the form of discussion.
+
+# Roadmap / Open Topics
+
+* Improve performance, especially on find operations
+* Clean up and improve test cases
+* Finalize API
+
 # API
 
 * [Store](#store)
@@ -34,8 +44,8 @@ Records.store({
   * [Store.find(:id)](#store-find-id)
   * [Store.find(:query)](#store-find-query)
   * [Store.find()](#store-find-all)
-  * [Store.remove(:item [,...])](#store-remove)
-  * [Store.empty()](#store-empty)
+  * [Store.remove(:item [,...])](#store-remove-item)
+  * [Store.remove()](#store-remove-all)
 * [Syncronization](#store-sync)
   * [Store.sync(:name [,:options])](#store-sync)
 * [Item](#item)
@@ -145,7 +155,7 @@ Users.find()
   });
 ```
 
-## Store.remove(:item)<a name="store-remove"></a>
+## Store.remove(:item)<a name="store-remove-item"></a>
 
 Removes the given [item](#item) from the store.
 
@@ -160,7 +170,7 @@ Records.remove(record)
   });
 ```
 
-## Store.empty()<a name="store-empty"></a>
+## Store.remove()<a name="store-remove-all"></a>
 
 Removes all [items](#item) from the store.
 
@@ -169,9 +179,9 @@ Removes all [items](#item) from the store.
 ### Example
 
 ``` javascript
-Records.empty()
+Records.remove()
   .then(function() {
-    console.log('The record was successfully removed')M
+    console.log('All items have been successfully removed from this store')M
   });
 ```
 
