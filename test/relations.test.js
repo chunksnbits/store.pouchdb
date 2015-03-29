@@ -12,6 +12,7 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
 
 PouchDb.plugin(PouchDbStore);
 
@@ -43,13 +44,13 @@ describe('Testing PouchDbStore relations', function() {
 
   before(function populateDb () {
 
-    Store = new PouchDb('tests', { db: require('memdown') }).store();
+    Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store();
 
     Store.hasMany('vehicles');
     Store.hasOne('boat', 'boats');
 
-    VehicleStore = new PouchDb('vehicles', { db: require('memdown') }).store();
-    BoatStore = new PouchDb('boats', { db: require('memdown') }).store();
+    VehicleStore = new PouchDb('vehicles', isNode ? { db: require('memdown') } : {}).store();
+    BoatStore = new PouchDb('boats', isNode ? { db: require('memdown') } : {}).store();
 
     // Just to be sure
     return clearDb();

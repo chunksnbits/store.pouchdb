@@ -13,6 +13,7 @@ var expect = require('chai').expect;
 
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
 
 require('mocha-qa').global();
 
@@ -35,11 +36,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will correctly validate an item using type definitions',
       function () {
-        var memdown = require('memdown');
-
-        var Store = new PouchDb('tests', {
-          db: memdown
-        }).store({
+        var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
           validates: {
             stringValue: 'string',
             numberValue: 'number',
@@ -64,11 +61,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will correctly validate a valid item using required definitions',
       function () {
-        var memdown = require('memdown');
-
-        var Store = new PouchDb('tests', {
-          db: memdown
-        }).store({
+        var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
           validates: {
             stringValue: { required: true },
             numberValue: { required: true },
@@ -93,8 +86,6 @@ describe('Testing shelfdb schema', function(){
 
     it('will call a custom validation function for each property specified',
       function () {
-        var memdown = require('memdown');
-
         var count = 0;
 
         function customValidation () {
@@ -102,9 +93,7 @@ describe('Testing shelfdb schema', function(){
           return true;
         }
 
-        var Store = new PouchDb('tests', {
-          db: memdown
-        }).store({
+        var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
           validates: {
             stringValue: customValidation,
             numberValue: customValidation,
@@ -131,11 +120,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid strings',
       function () {
-        var memdown = require('memdown');
-
-        var Store = new PouchDb('tests', {
-          db: memdown
-        }).store({
+        var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
           validates: {
             value: 'string'
           }
@@ -150,11 +135,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid numbers',
       function () {
-        var memdown = require('memdown');
-
-        var Store = new PouchDb('tests', {
-          db: memdown
-        }).store({
+        var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
           validates: {
             value: 'number'
           }
@@ -169,11 +150,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid dates',
         function () {
-          var memdown = require('memdown');
-
-          var Store = new PouchDb('tests', {
-            db: memdown
-          }).store({
+          var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
             validates: {
               value: 'date'
             }
@@ -189,11 +166,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid boolean',
         function () {
-          var memdown = require('memdown');
-
-          var Store = new PouchDb('tests', {
-            db: memdown
-          }).store({
+          var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
             validates: {
               value: 'boolean'
             }
@@ -208,11 +181,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid objects',
         function () {
-          var memdown = require('memdown');
-
-          var Store = new PouchDb('tests', {
-            db: memdown
-          }).store({
+          var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
             validates: {
               value: 'object'
             }
@@ -227,11 +196,7 @@ describe('Testing shelfdb schema', function(){
 
     it('will fail validating invalid arrays',
         function () {
-          var memdown = require('memdown');
-
-          var Store = new PouchDb('tests', {
-            db: memdown
-          }).store({
+          var Store = new PouchDb('tests', isNode ? { db: require('memdown') } : {}).store({
             validates: {
               value: 'array'
             }

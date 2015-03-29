@@ -12,12 +12,11 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
-
-var fs = require('fs.extra');
+var isNode = require('detect-node');
 
 require('mocha-qa').global();
 
-var RecordStore, pouch, sampleData = {};
+var pouch, sampleData = {};
 
 PouchDb.plugin(PouchDbStore);
 
@@ -30,108 +29,94 @@ function clearAllDocs (pouch) {
     });
 }
 
+var options = isNode ? {
+  defaultStore: {
+    db: require('memdown')
+  },
+  associatedStore: {
+    db: require('leveldown')
+  }
+} : {
+  defaultStore: {
+    adapter: 'websql'
+  },
+  associatedStore: {
+    adapter: 'websql'
+  }
+};
+
 describe('Testing shelfdb schema', function () {
 
   after(function () {
-    fs.rmrfSync('./tracks');
-    fs.rmrfSync('./artists');
-    fs.rmrfSync('./labels');
-    fs.rmrfSync('./likes');
+    if (isNode) {
+      var fs = require('fs.extra');
+
+      fs.rmrfSync('./tracks');
+      fs.rmrfSync('./artists');
+      fs.rmrfSync('./labels');
+      fs.rmrfSync('./likes');
+    }
   });
 
   describe('allows to add hasMany relations', function () {
 
     it('will automatically infer the store by name, if providing a name only on hasMany()',
       function () {
-        var memdown = require('memdown');
-
-        RecordStore = new PouchDb('playlists', {
-          db: memdown
-        }).store();
-
+        var RecordStore = new PouchDb('records', options.defaultStore).store();
         RecordStore.hasMany('tracks');
 
         var TrackStore = RecordStore._schema.hasMany.tracks;
 
         expect(TrackStore.toString()).to.equal('[object Store]');
         expect(TrackStore._adapter.pouch._db_name).to.equal('tracks');
-        expect(TrackStore._adapter.pouch.__opts.db).to.equal(memdown);
+        expect(TrackStore._adapter.pouch.__opts.db).to.equal(options.defaultStore.db);
       });
 
     it('will add a hasMany relation given the name of the relation and the name of the store to use for the relation',
       function () {
-        var memdown = require('memdown');
-
-        RecordStore = new PouchDb('playlists', {
-          db: memdown
-        }).store();
-
+        var RecordStore = new PouchDb('records', options.defaultStore).store();
         RecordStore.hasMany('items', 'tracks');
 
         var TestStore = RecordStore._schema.hasMany.items;
 
         expect(TestStore.toString()).to.equal('[object Store]');
         expect(TestStore._adapter.pouch._db_name).to.equal('tracks');
-        expect(TestStore._adapter.pouch.__opts.db).to.equal(memdown);
+        expect(TestStore._adapter.pouch.__opts.db).to.equal(options.defaultStore.db);
       });
 
     it('will add a hasMany relation given the name and a store to use for the relation',
       function () {
-        var leveldown = require('leveldown');
-
-        RecordStore = new PouchDb('playlists', {
-          db: require('memdown')
-        }).store();
-
-        var TrackStore = new PouchDb('tracks', {
-          db: leveldown
-        }).store();
-
+        var RecordStore = new PouchDb('playlists', options.defaultStore).store();
+        var TrackStore = new PouchDb('tracks', options.associatedStore).store();
         RecordStore.hasMany('tracks', TrackStore);
-
         var TestStore = RecordStore._schema.hasMany.tracks;
 
         expect(TestStore.toString()).to.equal('[object Store]');
         expect(TestStore._adapter.pouch._db_name).to.equal('tracks');
-        expect(TestStore._adapter.pouch.__opts.db).to.equal(leveldown);
+        expect(TestStore._adapter.pouch.__opts.db).to.equal(options.associatedStore.db);
       });
 
     it('will allow to add nested hasMany relations when providing a store as the relation',
       function () {
-        var leveldown = require('leveldown');
-
-        RecordStore = new PouchDb('playlists', {
-          db: require('memdown')
-        }).store();
-
-        var TrackStore = new PouchDb('tracks', {
-          db: leveldown
-        }).store();
+        var RecordStore = new PouchDb('playlists', options.defaultStore).store();
+        var TrackStore = new PouchDb('tracks', options.associatedStore).store();
 
         TrackStore.hasMany('likes');
-
         RecordStore.hasMany('tracks', TrackStore);
 
         var TestStore = RecordStore._schema.hasMany.tracks;
-
         var LikeStore = TestStore._schema.hasMany.likes;
 
         expect(LikeStore.toString()).to.equal('[object Store]');
         expect(LikeStore._adapter.pouch._db_name).to.equal('likes');
-        expect(LikeStore._adapter.pouch.__opts.db).to.equal(leveldown);
+        expect(LikeStore._adapter.pouch.__opts.db).to.equal(options.associatedStore.db);
       });
 
     it('will not add nested hasMany relations when providing the store by name',
       function () {
-        var leveldown = require('leveldown');
+        var RecordStore = new PouchDb('playlists', options.defaultStore).store();
 
-        RecordStore = new PouchDb('playlists', {
-          db: require('memdown')
-        }).store();
-
-        var TrackStore = new PouchDb('tracks', {
-          db: leveldown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.associatedStore).store();
 
         TrackStore.hasMany('likes');
         RecordStore.hasMany('tracks');
@@ -146,11 +131,7 @@ describe('Testing shelfdb schema', function () {
 
     it('will automatically infer the store by name, if providing a name only on hasOne()',
       function () {
-        var memdown = require('memdown');
-
-        var TrackStore = new PouchDb('tracks', {
-          db: memdown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.defaultStore).store();
 
         TrackStore.hasOne('artist');
 
@@ -158,16 +139,12 @@ describe('Testing shelfdb schema', function () {
 
         expect(ArtistStore.toString()).to.equal('[object Store]');
         expect(ArtistStore._adapter.pouch._db_name).to.equal('artist');
-        expect(ArtistStore._adapter.pouch.__opts.db).to.equal(memdown);
+        expect(ArtistStore._adapter.pouch.__opts.db).to.equal(options.defaultStore.db);
       });
 
     it('will add a hasOne relation given the name of the relation and the name of the store to use for the relation',
       function () {
-        var memdown = require('memdown');
-
-        var TrackStore = new PouchDb('tracks', {
-          db: memdown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.defaultStore).store();
 
         TrackStore.hasOne('artist', 'artists');
 
@@ -175,20 +152,13 @@ describe('Testing shelfdb schema', function () {
 
         expect(ArtistStore.toString()).to.equal('[object Store]');
         expect(ArtistStore._adapter.pouch._db_name).to.equal('artists');
-        expect(ArtistStore._adapter.pouch.__opts.db).to.equal(memdown);
+        expect(ArtistStore._adapter.pouch.__opts.db).to.equal(options.defaultStore.db);
       });
 
     it('will add a hasOne relation given the name and a store to use for the relation',
       function () {
-        var leveldown = require('leveldown');
-
-        var TrackStore = new PouchDb('tracks', {
-          db: require('memdown')
-        }).store();
-
-        var AritstCollection = new PouchDb('artists', {
-          db: leveldown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.defaultStore).store();
+        var AritstCollection = new PouchDb('artists', options.associatedStore).store();
 
         TrackStore.hasOne('artist', AritstCollection);
 
@@ -196,20 +166,13 @@ describe('Testing shelfdb schema', function () {
 
         expect(TestStore.toString()).to.equal('[object Store]');
         expect(TestStore._adapter.pouch._db_name).to.equal('artists');
-        expect(TestStore._adapter.pouch.__opts.db).to.equal(leveldown);
+        expect(TestStore._adapter.pouch.__opts.db).to.equal(options.associatedStore.db);
       });
 
     it('will allow to add nested hasOne relations when providing a store as the relation',
       function () {
-        var leveldown = require('leveldown');
-
-        var TrackStore = new PouchDb('tracks', {
-          db: require('memdown')
-        }).store();
-
-        var ArtistStore = new PouchDb('artists', {
-          db: leveldown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.defaultStore).store();
+        var ArtistStore = new PouchDb('artists', options.associatedStore).store();
 
         TrackStore.hasOne('artist', ArtistStore);
         ArtistStore.hasOne('label', 'labels');
@@ -219,20 +182,13 @@ describe('Testing shelfdb schema', function () {
 
         expect(LabelStore.toString()).to.equal('[object Store]');
         expect(LabelStore._adapter.pouch._db_name).to.equal('labels');
-        expect(LabelStore._adapter.pouch.__opts.db).to.equal(leveldown);
+        expect(LabelStore._adapter.pouch.__opts.db).to.equal(options.associatedStore.db);
       });
 
     it('will not add nested hasOne relations when providing the store by name',
       function () {
-        var leveldown = require('leveldown');
-
-        var TrackStore = new PouchDb('tracks', {
-          db: require('memdown')
-        }).store();
-
-        var ArtistStore = new PouchDb('artists', {
-          db: leveldown
-        }).store();
+        var TrackStore = new PouchDb('tracks', options.defaultStore).store();
+        var ArtistStore = new PouchDb('artists', options.associatedStore).store();
 
         TrackStore.hasOne('artist', 'artists');
         ArtistStore.hasOne('label', 'labels');

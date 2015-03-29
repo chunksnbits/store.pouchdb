@@ -1,5 +1,5 @@
 /* jshint node:true */
-/* global describe, beforeEach, before, after, it, catchIt */
+/* global describe, beforeEach, before, after, it, catchIt, isBrowser */
 
 // Ignores "Expected an assignment or function call and instead saw an expression"
 /* jshint -W030 */
@@ -12,6 +12,7 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
 
 require('mocha-qa').global();
 
@@ -31,19 +32,20 @@ function clearAllDocs (pouch) {
 describe('Testing shelfdb storage', function(){
 
   before(function setUpTestServer () {
-    pouch = new PouchDb('tests', { db: require('memdown') });
+    var options = isNode ? { db: require('memdown') } : {};
+
+    pouch = new PouchDb('tests', options);
     Store = pouch.store();
   });
 
   beforeEach(function () {
-    clearAllDocs(pouch);
+    return clearAllDocs(pouch);
   });
 
   describe('using store() with new items', function () {
 
     it('successfully creates a new item with a generated _id',
       function () {
-
         return Store.store({
           value: 'test'
         }).then(function (storedItem) {

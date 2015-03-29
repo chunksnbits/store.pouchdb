@@ -12,6 +12,8 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
+var sampleDataJson = require('./fixtures/sample-data.json');
 
 require('mocha-qa').global();
 
@@ -31,7 +33,7 @@ function clearAllDocs (pouch) {
 describe('Testing shelfdb lookups', function(){
 
   before(function initialize () {
-    pouch = new PouchDb('tests', { db: require('memdown') });
+    pouch = new PouchDb('tests', isNode ? { db: require('memdown') } : {});
     Store = pouch.store();
   });
 
@@ -40,9 +42,9 @@ describe('Testing shelfdb lookups', function(){
   });
 
   before(function populateDb () {
-    var items = _.cloneDeep(require('./fixtures/sample-data.json').values);
+    var items = _.cloneDeep(sampleDataJson.values);
 
-    pouch.bulkDocs(items)
+    return pouch.bulkDocs(items)
       .then(function (identity) {
         return _.map(items, function (item, index) {
           sampleData[item.value] = _.extend(item, identity[index]);

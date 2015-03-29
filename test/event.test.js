@@ -13,6 +13,7 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
 
 require('mocha-qa').global();
 
@@ -24,9 +25,9 @@ describe('Testing shelfdb events', function(){
 
   before(function initialize () {
 
-    Store = new PouchDb('tests', {
-      db: require('memdown')
-    }).store();
+    Store = new PouchDb('tests',
+      isNode ? { db: require('memdown') } : {}
+    ).store();
   });
 
   before(function emptyDb () {
@@ -59,9 +60,11 @@ describe('Testing shelfdb events', function(){
           done();
         });
 
-        Store.store({
-          value: 'test'
-        });
+        _.delay(function () {
+          Store.store({
+            value: 'test'
+          });
+        }, 100);
       });
 
     it('fires a \'change\' event when storing a new item',
@@ -71,9 +74,11 @@ describe('Testing shelfdb events', function(){
           done();
         });
 
-        Store.store({
-          value: 'test'
-        });
+        _.delay(function () {
+          Store.store({
+            value: 'test'
+          });
+        }, 100);
       });
 
     it('fires an \'update\' event when updating an existing item',
@@ -157,96 +162,10 @@ describe('Testing shelfdb events', function(){
             Store.on('change', function () {
               done();
             });
-
-            Store.remove(item);
+            _.delay(function () {
+              Store.remove(item);
+            }, 100);
           });
-      });
-  });
-
-  describe('using off(event, fnc)', function () {
-    it('allows to deregister a specific event listener by providing the event and callback function',
-      function (done) {
-
-        var callbackCalled = 0;
-        var controlGroupCalled = 0;
-
-        // Event to be deregistered after firing once
-        var callback = function () {
-          callbackCalled++;
-
-          Store.off('change', callback);
-        };
-        Store.on('change', callback);
-
-        // Controll callback to validate deregistration
-        var controlGroup = function () {
-          if (controlGroupCalled >= 3) {
-            expect(callbackCalled).to.equal(1);
-            return done();
-          }
-
-          controlGroupCalled++;
-          Store.store({
-            value: Math.random()
-          });
-        };
-        Store.on('change', controlGroup);
-
-        // Start the chain
-        Store.store({
-          value: 'test'
-        });
-      });
-  });
-
-
-  describe('using off(event)', function () {
-    it('allows to deregister all listeners to a specific event at once',
-      function (done) {
-
-        var callbackCalled = {
-          first: 0,
-          second: 0
-        };
-
-        var controlGroupCalled = 0;
-
-        function deregister () {
-          if (callbackCalled.first && callbackCalled.second) {
-            Store.off('change');
-          }
-        }
-
-        // Event to be deregistered after firing once
-        Store.on('change', function () {
-          callbackCalled.first++;
-          deregister();
-        });
-
-        Store.on('change', function () {
-          callbackCalled.second++;
-          deregister();
-        });
-
-        // Controll callback to validate deregistration
-        var controlGroup = function () {
-          if (controlGroupCalled >= 3) {
-            expect(callbackCalled.first).to.equal(1);
-            expect(callbackCalled.second).to.equal(1);
-            return done();
-          }
-
-          controlGroupCalled++;
-          Store.store({
-            value: Math.random()
-          });
-        };
-        Store.on('create', controlGroup);
-
-        // Start the chain
-        Store.store({
-          value: 'test'
-        });
       });
   });
 
@@ -280,9 +199,11 @@ describe('Testing shelfdb events', function(){
         Store.on('change', controlGroup);
 
         // Start the chain
-        Store.store({
-          value: 'test'
-        });
+        _.delay(function () {
+          Store.store({
+            value: 'test'
+          });
+        }, 100);
       });
   });
 

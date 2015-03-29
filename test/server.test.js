@@ -12,92 +12,102 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var http = require('http');
 
-var app, server, pouch;
+var isNode = require('detect-node');
 
-PouchDb.plugin(PouchDbStore);
+//
+// This is a backend-only part of the implementation.
+// No use letting it run on the browser, as it would fail
+// on the requirements.
+//
+if (isNode) {
 
-describe('Testing shelfdb server', function () {
+  var app, server, pouch;
 
-  beforeEach(function () {
-    var express = require('express');
-    app = express();
+  PouchDb.plugin(PouchDbStore);
 
-    pouch = new PouchDb('test', { db: require('memdown') });
-  });
+  describe('Testing shelfdb server', function () {
 
-  afterEach(function () {
-    server.close();
-  });
+    beforeEach(function () {
+      var express = require('express');
+      app = express();
 
-  describe('using store.listen()', function () {
+      pouch = new PouchDb('test', { db: require('memdown') });
+    });
 
-    it('will attach the store to the server app',
-      function (done) {
+    afterEach(function () {
+      server.close();
+    });
 
-        var store = pouch.store();
+    describe('using store.listen()', function () {
 
-        store.listen(app);
-
-        server = app.listen(1234);
-
-        http.get('http://localhost:1234/test', function (response) {
-          expect(response.statusCode).to.be.equal(200);
-          done();
-        })
-        .on('error', function(error) {
-          done(error);
-        });
-      });
-
-      it('will correctly use option "root"', function (done) {
+      it('will attach the store to the server app',
+        function (done) {
 
           var store = pouch.store();
 
-          store.listen(app, { root: '/store' });
+          store.listen(app);
 
           server = app.listen(1234);
 
-          http.get('http://localhost:1234/store/test', function (response) {
+          http.get('http://localhost:1234/test', function (response) {
             expect(response.statusCode).to.be.equal(200);
             done();
           })
           .on('error', function(error) {
             done(error);
           });
-      });
-  });
-
-  describe('using initialization options', function () {
-
-    it('will attach the store to the server app',
-      function (done) {
-
-        var store = pouch.store({ listen: app });
-
-        server = app.listen(1234);
-
-        http.get('http://localhost:1234/test', function (response) {
-          expect(response.statusCode).to.be.equal(200);
-          done();
-        })
-        .on('error', function(error) {
-          done(error);
         });
-      });
 
-      it('will correctly use option "root"', function (done) {
+        it('will correctly use option "root"', function (done) {
 
-          var store = pouch.store({ listen: app, root: '/store' });
+            var store = pouch.store();
+
+            store.listen(app, { root: '/store' });
+
+            server = app.listen(1234);
+
+            http.get('http://localhost:1234/store/test', function (response) {
+              expect(response.statusCode).to.be.equal(200);
+              done();
+            })
+            .on('error', function(error) {
+              done(error);
+            });
+        });
+    });
+
+    describe('using initialization options', function () {
+
+      it('will attach the store to the server app',
+        function (done) {
+
+          var store = pouch.store({ listen: app });
 
           server = app.listen(1234);
 
-          http.get('http://localhost:1234/store/test', function (response) {
+          http.get('http://localhost:1234/test', function (response) {
             expect(response.statusCode).to.be.equal(200);
             done();
           })
           .on('error', function(error) {
             done(error);
           });
-      });
+        });
+
+        it('will correctly use option "root"', function (done) {
+
+            var store = pouch.store({ listen: app, root: '/store' });
+
+            server = app.listen(1234);
+
+            http.get('http://localhost:1234/store/test', function (response) {
+              expect(response.statusCode).to.be.equal(200);
+              done();
+            })
+            .on('error', function(error) {
+              done(error);
+            });
+        });
+    });
   });
-});
+}

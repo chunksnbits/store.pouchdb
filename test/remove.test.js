@@ -12,6 +12,7 @@ var PouchDbStore = require('../index');
 var expect = require('chai').expect;
 var _ = require('lodash');
 var q = require('bluebird');
+var isNode = require('detect-node');
 
 PouchDb.plugin(PouchDbStore);
 
@@ -34,7 +35,7 @@ describe('Testing PouchDbStore deletions', function(){
 
   beforeEach(function populateDb () {
 
-    pouch = new PouchDb('tests', { db: require('memdown') });
+    pouch = new PouchDb('tests', isNode ? { db: require('memdown') } : {});
     Store = pouch.store();
 
     return clearAllDocs(pouch)

@@ -11,6 +11,7 @@ var PouchDbStore = require('../index');
 
 var expect = require('chai').expect;
 var http = require('http');
+var isNode = require('detect-node');
 
 var pouch, syncStore;
 
@@ -19,17 +20,11 @@ PouchDb.plugin(PouchDbStore);
 describe('Testing shelfdb sync', function () {
 
   before(function () {
-    var express = require('express');
-    var app = express();
-
-    syncStore = new PouchDb('sync', { db: require('memdown') }).store();
-    syncStore.listen(app, { root: '/remote' });
-
-    app.listen(1234);
+    syncStore = new PouchDb('sync', isNode ? { db: require('memdown') } : {}).store();
   });
 
   beforeEach(function () {
-    pouch = new PouchDb('test', { db: require('memdown') });
+    pouch = new PouchDb('test', isNode ? { db: require('memdown') } : {});
   });
 
   describe('using sync', function () {
@@ -50,7 +45,7 @@ describe('Testing shelfdb sync', function () {
       function () {
         var store = pouch.store();
 
-        var syncStore = new PouchDb('sync', { db: require('memdown') }).store();
+        var syncStore = new PouchDb('sync', isNode ? { db: require('memdown') } : {}).store();
 
         var sync = store.sync(syncStore);
 
@@ -64,7 +59,7 @@ describe('Testing shelfdb sync', function () {
       function () {
         var store = pouch.store();
 
-        var syncStore = new PouchDb('sync', { db: require('memdown') });
+        var syncStore = new PouchDb('sync', isNode ? { db: require('memdown') } : {});
 
         var sync = store.sync(syncStore);
 
