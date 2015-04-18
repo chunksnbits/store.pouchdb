@@ -1,11 +1,11 @@
 {
   "name": "store.pouchdb",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "ORM-style storage plugin for the PouchDb database",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chunksnbits/store.pouch.git"
+    "url": "https://github.com/chunksnbits/store.pouchdb.git"
   },
   "bugs": {
     "url": "https://github.com/chunksnbits/store.pouch/issues"
