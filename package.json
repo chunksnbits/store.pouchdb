@@ -1,6 +1,6 @@
 {
   "name": "store.pouchdb",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "ORM-style storage plugin for the PouchDb database",
   "main": "index.js",
   "repository": {
