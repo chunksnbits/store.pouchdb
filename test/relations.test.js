@@ -390,7 +390,7 @@ describe('Testing PouchDbStore relations', function() {
           }]
         })
           .then(function (item) {
-            itemToCompare = _.clone(item.vehicles);
+            itemToCompare = _.cloneDeep(item.vehicles);
 
             item.value = 'changed';
             item.vehicles[0].value = 'relation-changed';
