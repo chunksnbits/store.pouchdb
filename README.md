@@ -157,7 +157,7 @@ Removes the given [item](#item) from the store.
 ``` javascript
 Records.remove(record)
   .then(function() {
-    console.log('The record was successfully removed')M
+    console.log('The record was successfully removed').
   });
 ```
 
