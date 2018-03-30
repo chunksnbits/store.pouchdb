@@ -47,6 +47,7 @@ Records.store({
   * [item.store()](#item-store)
   * [item.remove()](#item-remove)
   * [item.$info](#item-info)
+  * [item.rev](#item-rev)
 * [Properties](#properties)
   * [Store.hasMany(:property [,:store])](#properties-has-many)
   * [Store.hasOne(:property [,:store])](#properties-has-one)
@@ -54,7 +55,7 @@ Records.store({
   * [Store.schema(:schema)](#properties-schema)
 * [Events](#events)
   * [Store.on(:event, :callback)](#store-on)
-  * [listener.cancel()](#listener-cancel)
+  * [listener.off()](#listener-off)
 
 
 # Store<a name="store"></a>
@@ -135,7 +136,7 @@ Users.find({ name: 'John' })
 
 ### Store.find()<a name="store-find-all"></a>
 
-Looks up all [itens](#item) currently kept in the store.
+Looks up all [items](#item) currently kept in the store.
 
 * Returns a [promise](#promises) that on resolution will provide all items currently stored in this store.
 * Returns an empty array if the store is empty.
@@ -160,7 +161,7 @@ Removes the given [item](#item) from the store.
 ``` javascript
 Records.remove(record)
   .then(function() {
-    console.log('The record was successfully removed')M
+    console.log('The record was successfully removed').
   });
 ```
 
@@ -237,7 +238,7 @@ Stores the item in the [store](#store) used for the creation of this item.
 ``` javascript
 var john = Users.new(/* properties */);
 
-john.save()
+john.store()
   .then(function () {
     console.log('Item successfully stored');
   });
@@ -415,8 +416,8 @@ var listener = MyStore.on('update', function () {
 
 ## listener.off()<a name="listener-off"></a>
 
-Applies to the listener object returned by the [on](#store.on)) function.
-The listener allows to keep track of the subscription and provides an alternative way to cancel the listener if no longer needed.
+Applies to the listener object returned by the [on](#store.on) function.
+The listener allows you to keep track of the subscription and provides an alternative way to cancel the listener if no longer needed.
 
 ``` javascript
 var listener = MyStore.on('update', function () {/* the magic happens here */});
